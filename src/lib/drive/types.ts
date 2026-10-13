@@ -25,4 +25,5 @@ export interface DriveAuthState {
   tokenExpiresAt: number | null
   userEmail?: string
   lastSyncAt?: Timestamp
+  folderId?: string
 }

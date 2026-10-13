@@ -192,27 +192,59 @@ export async function requestGoogleDriveAccess(clientId?: string): Promise<{ suc
 
 /**
  * Gets or creates the dedicated "Screenplay Studio" folder in user's Google Drive.
+ * Reuses and persists folder ID to avoid creating duplicate folders.
  */
 export async function getOrCreateAppFolder(accessToken: string): Promise<string> {
-  // 1. Search for existing folder
+  const auth = getDriveAuthState()
+
+  // 1. Check if folder ID is already cached and still valid
+  if (auth.folderId) {
+    try {
+      const checkRes = await fetch(
+        `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(auth.folderId)}?fields=id,name,trashed`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      )
+      if (checkRes.ok) {
+        const checkData = await checkRes.json()
+        if (checkData && !checkData.trashed) {
+          return checkData.id
+        }
+      }
+    } catch {
+      // If validation fails or network hiccup, fallback to search/create
+    }
+  }
+
+  // 2. Search for existing folder
   const query = `name='${APP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`
-  const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(query)}&fields=files(id,name)`
+  const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(
+    query
+  )}&fields=files(id,name,trashed)`
 
   const searchRes = await fetch(searchUrl, {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
 
   if (!searchRes.ok) {
-    throw new Error(`Failed to query Google Drive folder: ${searchRes.statusText}`)
+    if (searchRes.status === 401) {
+      saveDriveAuthState({ isConnected: false, accessToken: null })
+      throw new Error('Google Drive session expired. Please reconnect in Settings.')
+    }
+    const errData = await searchRes.json().catch(() => ({}))
+    throw new Error(`Failed to query Google Drive folder: ${errData.error?.message || searchRes.statusText}`)
   }
 
   const searchData = await searchRes.json()
   if (searchData.files && searchData.files.length > 0) {
-    return searchData.files[0].id
+    const existingFolderId = searchData.files[0].id
+    saveDriveAuthState({ folderId: existingFolderId })
+    return existingFolderId
   }
 
-  // 2. Create folder if not found
-  const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+  // 3. Create folder if not found
+  const createRes = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -225,15 +257,22 @@ export async function getOrCreateAppFolder(accessToken: string): Promise<string>
   })
 
   if (!createRes.ok) {
-    throw new Error(`Failed to create Google Drive folder: ${createRes.statusText}`)
+    if (createRes.status === 401) {
+      saveDriveAuthState({ isConnected: false, accessToken: null })
+      throw new Error('Google Drive session expired. Please reconnect in Settings.')
+    }
+    const errData = await createRes.json().catch(() => ({}))
+    throw new Error(`Failed to create Google Drive folder: ${errData.error?.message || createRes.statusText}`)
   }
 
   const newFolder = await createRes.json()
+  saveDriveAuthState({ folderId: newFolder.id })
   return newFolder.id
 }
 
 /**
  * Uploads a file (PDF, Fountain, FDX, JSON) to the Screenplay Studio Google Drive folder.
+ * Uses Google Drive API v3 multipart/related media upload format.
  */
 export async function uploadToGoogleDrive(params: {
   filename: string
@@ -242,17 +281,37 @@ export async function uploadToGoogleDrive(params: {
   projectId?: EntityId
 }): Promise<DriveFileMetadata> {
   const auth = getDriveAuthState()
-  if (!auth.accessToken || !auth.isConnected) {
-    throw new Error('Not connected to Google Drive')
+  if (!auth.accessToken) {
+    throw new Error('Not connected to Google Drive. Please connect in Settings.')
+  }
+
+  // Check token expiration
+  if (auth.tokenExpiresAt && Date.now() > auth.tokenExpiresAt) {
+    saveDriveAuthState({ isConnected: false, accessToken: null })
+    throw new Error('Google Drive session expired. Please reconnect in Settings.')
+  }
+
+  if (!auth.isConnected) {
+    throw new Error('Not connected to Google Drive. Please connect in Settings.')
   }
 
   const folderId = await getOrCreateAppFolder(auth.accessToken)
+
+  // Map format to exact MIME type
+  const mimeMap: Record<DriveExportFormat, string> = {
+    PDF: 'application/pdf',
+    Fountain: 'text/plain;charset=utf-8',
+    FDX: 'application/xml;charset=utf-8',
+    JSON: 'application/json;charset=utf-8',
+  }
+  const fileMimeType = params.blob.type || mimeMap[params.format] || 'application/octet-stream'
 
   // Multipart upload metadata
   const metadata = {
     name: params.filename,
     parents: [folderId],
-    description: `Exported from Screenplay Studio (${params.format})`,
+    description: `Screenplay Studio backup (${params.format})`,
+    mimeType: fileMimeType,
     properties: {
       source: 'ScreenplayStudio',
       format: params.format,
@@ -260,12 +319,21 @@ export async function uploadToGoogleDrive(params: {
     },
   }
 
-  const formData = new FormData()
-  formData.append(
-    'metadata',
-    new Blob([JSON.stringify(metadata)], { type: 'application/json; charset=UTF-8' })
+  // Build standard RFC multipart/related body for Google Drive v3 upload endpoint
+  const boundary = '-------ScreenplayStudioBoundary' + Math.random().toString(36).substring(2)
+  const delimiter = `\r\n--${boundary}\r\n`
+  const closeDelimiter = `\r\n--${boundary}--`
+
+  const metadataPart =
+    `Content-Type: application/json; charset=UTF-8\r\n\r\n` +
+    JSON.stringify(metadata)
+
+  const mediaPartHeader = `Content-Type: ${fileMimeType}\r\n\r\n`
+
+  const multipartBlob = new Blob(
+    [delimiter, metadataPart, delimiter, mediaPartHeader, params.blob, closeDelimiter],
+    { type: `multipart/related; boundary=${boundary}` }
   )
-  formData.append('file', params.blob)
 
   const uploadRes = await fetch(
     'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,createdTime,webViewLink',
@@ -273,12 +341,17 @@ export async function uploadToGoogleDrive(params: {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
+        'Content-Type': `multipart/related; boundary=${boundary}`,
       },
-      body: formData,
+      body: multipartBlob,
     }
   )
 
   if (!uploadRes.ok) {
+    if (uploadRes.status === 401) {
+      saveDriveAuthState({ isConnected: false, accessToken: null })
+      throw new Error('Google Drive authorization expired or was revoked. Please reconnect in Settings.')
+    }
     const errorJson = await uploadRes.json().catch(() => ({}))
     const msg = errorJson.error?.message || uploadRes.statusText
     throw new Error(`Google Drive upload failed: ${msg}`)
@@ -286,13 +359,17 @@ export async function uploadToGoogleDrive(params: {
 
   const result = await uploadRes.json()
 
+  if (!result || !result.id) {
+    throw new Error('Google Drive did not return a valid file ID confirmation.')
+  }
+
   // Track last sync time
   saveDriveAuthState({ lastSyncAt: Date.now() as any })
 
   return {
     id: result.id,
-    name: result.name,
-    mimeType: result.mimeType,
+    name: result.name || params.filename,
+    mimeType: result.mimeType || fileMimeType,
     exportFormat: params.format,
     size: parseInt(result.size, 10) || params.blob.size,
     createdTime: result.createdTime,

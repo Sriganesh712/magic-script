@@ -37,6 +37,10 @@ import {
   exportToFDX,
   htmlToElements,
 } from '@/lib/export'
+import {
+  getDriveAuthState,
+  uploadToGoogleDrive,
+} from '@/lib/drive'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -62,6 +66,10 @@ import {
   MapPin,
   StickyNote,
   History,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  ExternalLink,
 } from 'lucide-react'
 import '@/editor/ScreenplayEditor.css'
 
@@ -84,6 +92,12 @@ export function EditorPage() {
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('outline')
   const [showRecovery, setShowRecovery] = useState(false)
   const [exportNotice, setExportNotice] = useState<string | null>(null)
+  const [cloudNotice, setCloudNotice] = useState<{
+    type: 'loading' | 'success' | 'error'
+    message: string
+    link?: string
+  } | null>(null)
+  const [exportingFormat, setExportingFormat] = useState<'PDF' | 'Fountain' | 'FDX' | null>(null)
 
   // Editor references
   const editorRef = useRef<any>(null)
@@ -276,8 +290,11 @@ export function EditorPage() {
 
   // Real Export Handlers (PDF, Fountain, FDX)
   const handleExport = async (format: 'PDF' | 'Fountain' | 'FDX') => {
+    if (exportingFormat) return // Prevent duplicate concurrent exports
+    setExportingFormat(format)
+    setExportNotice(`Generating ${format} export...`)
+
     try {
-      setExportNotice(`Generating ${format} export...`)
       const elements = htmlToElements(content)
       const doc: ScreenplayDocument = {
         id: screenplay?.id || (generateId() as EntityId),
@@ -296,7 +313,9 @@ export function EditorPage() {
       }
 
       let blob: Blob
-      let filename = `${project?.name || 'screenplay'}`.toLowerCase().replace(/[^a-z0-9_-]/g, '_')
+      const baseTitle = project?.name?.trim() || 'screenplay'
+      const safeTitle = baseTitle.replace(/[/\\?%*:|"<>]/g, '_').toLowerCase().replace(/\s+/g, '_')
+      let filename = safeTitle
 
       if (format === 'PDF') {
         blob = await exportToPDF(doc, {
@@ -320,18 +339,61 @@ export function EditorPage() {
         filename += '.fdx'
       }
 
+      // 1. Preserve local PDF export: always download locally first
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = filename
       a.click()
       URL.revokeObjectURL(url)
-      setExportNotice(`Exported ${filename} successfully!`)
-      setTimeout(() => setExportNotice(null), 3000)
+      setExportNotice(`Exported ${filename} locally!`)
+      setTimeout(() => setExportNotice(null), 4000)
+
+      // 2. Google Drive Cloud Backup (if connected)
+      const driveAuth = getDriveAuthState()
+      if (driveAuth.isConnected && driveAuth.accessToken) {
+        setCloudNotice({
+          type: 'loading',
+          message: `Backing up ${filename} to Google Drive ('Screenplay Studio' folder)...`,
+        })
+
+        try {
+          // Upload exact same blob to Screenplay Studio folder in Drive
+          const uploadRes = await uploadToGoogleDrive({
+            filename,
+            blob,
+            format,
+            projectId: project?.id,
+          })
+
+          // Verify upload confirmation from Google Drive API
+          if (uploadRes && uploadRes.id) {
+            setCloudNotice({
+              type: 'success',
+              message: `Backed up to Google Drive ('Screenplay Studio' folder)!`,
+              link: uploadRes.webViewLink,
+            })
+            setTimeout(() => setCloudNotice(null), 7000)
+          } else {
+            throw new Error('Google Drive upload could not be verified (missing file ID).')
+          }
+        } catch (cloudErr: any) {
+          // Keep local export working, display separate cloud upload error
+          const msg = cloudErr?.message || 'Google Drive backup failed'
+          console.error('[Google Drive Backup Error]', msg)
+          setCloudNotice({
+            type: 'error',
+            message: `Google Drive backup failed: ${msg}`,
+          })
+          setTimeout(() => setCloudNotice(null), 8000)
+        }
+      }
     } catch (err) {
       console.error(`[Export Error] Failed to export ${format}:`, err)
       setExportNotice(`Export failed: ${(err as Error).message}`)
       setTimeout(() => setExportNotice(null), 5000)
+    } finally {
+      setExportingFormat(null)
     }
   }
 
@@ -425,7 +487,7 @@ export function EditorPage() {
         />
       )}
 
-      {/* Export notification banner */}
+      {/* Local Export notification banner */}
       {exportNotice && (
         <div className="bg-primary/10 border-b border-primary/20 text-primary text-xs px-4 py-2 flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -435,6 +497,42 @@ export function EditorPage() {
           <button
             onClick={() => setExportNotice(null)}
             className="text-primary hover:underline font-semibold"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Cloud Backup notification banner (Google Drive) */}
+      {cloudNotice && (
+        <div
+          className={`border-b text-xs px-4 py-2 flex items-center justify-between transition-colors ${
+            cloudNotice.type === 'loading'
+              ? 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400'
+              : cloudNotice.type === 'success'
+              ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+              : 'bg-rose-500/10 border-rose-500/20 text-rose-600 dark:text-rose-400'
+          }`}
+        >
+          <span className="flex items-center gap-2">
+            {cloudNotice.type === 'loading' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            {cloudNotice.type === 'success' && <CheckCircle2 className="w-3.5 h-3.5" />}
+            {cloudNotice.type === 'error' && <AlertCircle className="w-3.5 h-3.5" />}
+            <span>{cloudNotice.message}</span>
+            {cloudNotice.link && (
+              <a
+                href={cloudNotice.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline ml-1 inline-flex items-center gap-0.5 hover:opacity-80 font-medium"
+              >
+                Open in Drive <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </span>
+          <button
+            onClick={() => setCloudNotice(null)}
+            className="hover:underline font-semibold opacity-80 hover:opacity-100"
           >
             Dismiss
           </button>
@@ -521,28 +619,41 @@ export function EditorPage() {
                 variant="outline"
                 size="xs"
                 onClick={() => handleExport('PDF')}
+                disabled={exportingFormat !== null}
                 className="text-[11px] h-7 px-2"
                 title="Export script to Industry Standard PDF"
               >
-                <FileDown className="w-3 h-3 mr-1" />
-                PDF
+                {exportingFormat === 'PDF' ? (
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-blue-500" />
+                ) : (
+                  <FileDown className="w-3 h-3 mr-1" />
+                )}
+                {exportingFormat === 'PDF' ? 'Exporting...' : 'PDF'}
               </Button>
               <Button
                 variant="outline"
                 size="xs"
                 onClick={() => handleExport('Fountain')}
+                disabled={exportingFormat !== null}
                 className="text-[11px] h-7 px-2 hidden sm:inline-flex"
                 title="Export plain-text Fountain format"
               >
+                {exportingFormat === 'Fountain' && (
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-blue-500" />
+                )}
                 Fountain
               </Button>
               <Button
                 variant="outline"
                 size="xs"
                 onClick={() => handleExport('FDX')}
+                disabled={exportingFormat !== null}
                 className="text-[11px] h-7 px-2 hidden sm:inline-flex"
                 title="Export to Final Draft (FDX)"
               >
+                {exportingFormat === 'FDX' && (
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-blue-500" />
+                )}
                 FDX
               </Button>
             </div>

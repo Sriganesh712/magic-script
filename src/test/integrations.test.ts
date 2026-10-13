@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import {
   enqueueSyncOp,
   resolveConflict,
@@ -10,6 +10,9 @@ import {
   disconnectGoogleDrive,
   getResolvedGoogleClientId,
   saveCustomGoogleClientId,
+  getOrCreateAppFolder,
+  uploadToGoogleDrive,
+  listDriveFiles,
 } from '@/lib/drive'
 import { exchangeCodeForSession } from '@/lib/supabase'
 import {
@@ -131,6 +134,269 @@ describe('Cloud Sync, Drive & AI Integrations (SYNC, DRV, AI)', () => {
       // Clear custom ID
       saveCustomGoogleClientId('')
       expect(localStorage.getItem('screenplay_studio_google_client_id')).toBeNull()
+    })
+  })
+
+  describe('Google Drive Folder Management & Multipart Upload (DRV-002, DRV-003, DRV-004)', () => {
+    const originalFetch = globalThis.fetch
+
+    afterEach(() => {
+      globalThis.fetch = originalFetch
+      vi.restoreAllMocks()
+    })
+
+    it('rejects upload when not connected', async () => {
+      disconnectGoogleDrive()
+      const dummyBlob = new Blob(['%PDF-1.4 dummy'], { type: 'application/pdf' })
+      await expect(
+        uploadToGoogleDrive({
+          filename: 'test.pdf',
+          blob: dummyBlob,
+          format: 'PDF',
+        })
+      ).rejects.toThrow(/Not connected to Google Drive/i)
+    })
+
+    it('rejects upload and clears session when token is expired', async () => {
+      saveDriveAuthState({
+        isConnected: true,
+        accessToken: 'expired_token',
+        tokenExpiresAt: Date.now() - 5000,
+      })
+      const dummyBlob = new Blob(['%PDF-1.4 dummy'], { type: 'application/pdf' })
+      await expect(
+        uploadToGoogleDrive({
+          filename: 'test.pdf',
+          blob: dummyBlob,
+          format: 'PDF',
+        })
+      ).rejects.toThrow(/session expired/i)
+
+      expect(getDriveAuthState().isConnected).toBe(false)
+    })
+
+    it('creates Screenplay Studio folder if not found and saves folderId', async () => {
+      const mockFetch = vi.fn().mockImplementation(async (url: string, opts?: any) => {
+        if (url.includes('/drive/v3/files?q=')) {
+          // Query for folder: returns empty
+          return new Response(JSON.stringify({ files: [] }), { status: 200 })
+        }
+        if (url.includes('/drive/v3/files?fields=id,name') && opts?.method === 'POST') {
+          // Create folder
+          const body = JSON.parse(opts.body)
+          expect(body.name).toBe('Screenplay Studio')
+          expect(body.mimeType).toBe('application/vnd.google-apps.folder')
+          return new Response(JSON.stringify({ id: 'new_folder_777', name: 'Screenplay Studio' }), {
+            status: 200,
+          })
+        }
+        return new Response('Not found', { status: 404 })
+      })
+
+      globalThis.fetch = mockFetch
+
+      const folderId = await getOrCreateAppFolder('valid_token')
+      expect(folderId).toBe('new_folder_777')
+      expect(getDriveAuthState().folderId).toBe('new_folder_777')
+    })
+
+    it('validates and reuses cached folderId to avoid duplicate folder creation', async () => {
+      saveDriveAuthState({
+        isConnected: true,
+        accessToken: 'valid_token',
+        folderId: 'cached_folder_888',
+      })
+
+      const mockFetch = vi.fn().mockImplementation(async (url: string) => {
+        if (url.includes('/drive/v3/files/cached_folder_888')) {
+          // Folder exists and not trashed
+          return new Response(
+            JSON.stringify({ id: 'cached_folder_888', name: 'Screenplay Studio', trashed: false }),
+            { status: 200 }
+          )
+        }
+        // Should NOT call search or create!
+        throw new Error(`Unexpected fetch call to ${url}`)
+      })
+
+      globalThis.fetch = mockFetch
+
+      const folderId = await getOrCreateAppFolder('valid_token')
+      expect(folderId).toBe('cached_folder_888')
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+    })
+
+    it('uploads PDF blob with multipart/related payload and verifies API result', async () => {
+      saveDriveAuthState({
+        isConnected: true,
+        accessToken: 'mock_drive_token_456',
+        tokenExpiresAt: Date.now() + 3600000,
+        folderId: 'folder_999',
+      })
+
+      let uploadCalled = false
+      const mockFetch = vi.fn().mockImplementation(async (url: string, opts?: any) => {
+        if (url.includes('/drive/v3/files/folder_999')) {
+          return new Response(
+            JSON.stringify({ id: 'folder_999', name: 'Screenplay Studio', trashed: false }),
+            { status: 200 }
+          )
+        }
+        if (url.includes('uploadType=multipart')) {
+          uploadCalled = true
+          expect(opts.method).toBe('POST')
+          expect(opts.headers.Authorization).toBe('Bearer mock_drive_token_456')
+          expect(opts.headers['Content-Type']).toMatch(/^multipart\/related; boundary=/)
+
+          // Verify body contains multipart structure
+          const bodyBlob: Blob = opts.body
+          const bodyText = await bodyBlob.text()
+          expect(bodyText).toContain('Screenplay Studio backup (PDF)')
+          expect(bodyText).toContain('"parents":["folder_999"]')
+          expect(bodyText).toContain('Content-Type: application/pdf')
+
+          return new Response(
+            JSON.stringify({
+              id: 'uploaded_file_doc_101',
+              name: 'my_screenplay.pdf',
+              mimeType: 'application/pdf',
+              size: '4096',
+              createdTime: new Date().toISOString(),
+              webViewLink: 'https://drive.google.com/file/d/uploaded_file_doc_101/view',
+            }),
+            { status: 200 }
+          )
+        }
+        return new Response('Not found', { status: 404 })
+      })
+
+      globalThis.fetch = mockFetch
+
+      const pdfBlob = new Blob(['%PDF-1.4 sample screenplay content'], { type: 'application/pdf' })
+      const metadata = await uploadToGoogleDrive({
+        filename: 'my_screenplay.pdf',
+        blob: pdfBlob,
+        format: 'PDF',
+        projectId: 'proj_123' as EntityId,
+      })
+
+      expect(uploadCalled).toBe(true)
+      expect(metadata.id).toBe('uploaded_file_doc_101')
+      expect(metadata.name).toBe('my_screenplay.pdf')
+      expect(metadata.webViewLink).toContain('uploaded_file_doc_101')
+      expect(metadata.exportFormat).toBe('PDF')
+      expect(getDriveAuthState().lastSyncAt).toBeDefined()
+    })
+
+    it('handles failed upload and throws error without corrupting connection', async () => {
+      saveDriveAuthState({
+        isConnected: true,
+        accessToken: 'mock_token',
+        tokenExpiresAt: Date.now() + 3600000,
+        folderId: 'folder_err',
+      })
+
+      const mockFetch = vi.fn().mockImplementation(async (url: string) => {
+        if (url.includes('/drive/v3/files/folder_err')) {
+          return new Response(
+            JSON.stringify({ id: 'folder_err', name: 'Screenplay Studio', trashed: false }),
+            { status: 200 }
+          )
+        }
+        if (url.includes('uploadType=multipart')) {
+          return new Response(
+            JSON.stringify({ error: { message: 'User storage quota exceeded' } }),
+            { status: 403, statusText: 'Forbidden' }
+          )
+        }
+        return new Response('Not found', { status: 404 })
+      })
+
+      globalThis.fetch = mockFetch
+
+      const pdfBlob = new Blob(['%PDF-1.4 sample'], { type: 'application/pdf' })
+      await expect(
+        uploadToGoogleDrive({
+          filename: 'quota_fail.pdf',
+          blob: pdfBlob,
+          format: 'PDF',
+        })
+      ).rejects.toThrow(/User storage quota exceeded/i)
+
+      // Connection is preserved (not an auth failure)
+      expect(getDriveAuthState().isConnected).toBe(true)
+    })
+
+    it('handles 401 error during upload by disconnecting and throwing session expired', async () => {
+      saveDriveAuthState({
+        isConnected: true,
+        accessToken: 'revoked_token',
+        tokenExpiresAt: Date.now() + 3600000,
+        folderId: 'folder_401',
+      })
+
+      const mockFetch = vi.fn().mockImplementation(async (url: string) => {
+        if (url.includes('/drive/v3/files/folder_401')) {
+          return new Response(
+            JSON.stringify({ id: 'folder_401', name: 'Screenplay Studio', trashed: false }),
+            { status: 200 }
+          )
+        }
+        if (url.includes('uploadType=multipart')) {
+          return new Response(
+            JSON.stringify({ error: { message: 'Invalid Credentials' } }),
+            { status: 401, statusText: 'Unauthorized' }
+          )
+        }
+        return new Response('Not found', { status: 404 })
+      })
+
+      globalThis.fetch = mockFetch
+
+      const pdfBlob = new Blob(['%PDF-1.4 sample'], { type: 'application/pdf' })
+      await expect(
+        uploadToGoogleDrive({
+          filename: 'revoked.pdf',
+          blob: pdfBlob,
+          format: 'PDF',
+        })
+      ).rejects.toThrow(/expired or was revoked/i)
+
+      expect(getDriveAuthState().isConnected).toBe(false)
+      expect(getDriveAuthState().accessToken).toBeNull()
+    })
+
+    it('rejects upload if API response does not contain an id', async () => {
+      saveDriveAuthState({
+        isConnected: true,
+        accessToken: 'mock_token',
+        tokenExpiresAt: Date.now() + 3600000,
+        folderId: 'folder_noid',
+      })
+
+      const mockFetch = vi.fn().mockImplementation(async (url: string) => {
+        if (url.includes('/drive/v3/files/folder_noid')) {
+          return new Response(
+            JSON.stringify({ id: 'folder_noid', name: 'Screenplay Studio', trashed: false }),
+            { status: 200 }
+          )
+        }
+        if (url.includes('uploadType=multipart')) {
+          return new Response(JSON.stringify({}), { status: 200 })
+        }
+        return new Response('Not found', { status: 404 })
+      })
+
+      globalThis.fetch = mockFetch
+
+      const pdfBlob = new Blob(['%PDF-1.4 sample'], { type: 'application/pdf' })
+      await expect(
+        uploadToGoogleDrive({
+          filename: 'no_id.pdf',
+          blob: pdfBlob,
+          format: 'PDF',
+        })
+      ).rejects.toThrow(/did not return a valid file ID confirmation/i)
     })
   })
 

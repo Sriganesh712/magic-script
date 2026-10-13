@@ -45,12 +45,17 @@
     - `src/test/router.test.ts` (6 tests pass)
     - `src/test/sample.test.tsx` (4 tests pass)
     - `src/test/statsCard.test.tsx` (2 tests pass)
--   **End-to-End test suite**: `npm run test:e2e` passes **5/5 Playwright tests**:
+-   **End-to-End test suite**: `npm run test:e2e` passes **10/10 Playwright tests across all core workflows**:
     1. Loads home page & sidebar navigation
     2. Navigates smoothly between Projects, Dashboard, and Settings
-    3. Creates a new screenplay project and immediately transitions to editor
-    4. Loads sample project, opens editor, manipulates screenplay toolbar elements, and verifies PDF export availability
-    5. Tests production tools: characters, locations, notes, and revision snapshotting
+    3. Creates a new screenplay project and writes elements offline
+    4. Reloads and recovers the saved document from IndexedDB
+    5. Tracks writing progress, goals, heatmap, and analytics on Dashboard
+    6. Exports screenplay to PDF, Fountain, and FDX formats
+    7. Tests production tools: Character DB, Location DB, Notes, and Revision Snapshotting
+    8. Operates 100% locally without an account or AI credentials
+    9. Configures screenplay paper formats, margins, and appearance in Settings
+    10. Workspace full backup and disaster recovery restore triggers
 -   **Production Tools (REV-001 through REV-007)**:
     - `src/editor/SceneOutlinePanel.tsx`: Editable scene cards, beat summaries, notes, act colors, drag-and-drop reordering
     - `src/components/production/CharacterPanel.tsx`: Auto-extracts characters, dialogue counts, scene counts, arcs, colors
@@ -115,5 +120,5 @@
 
   Hardening and           COMPLETE                AGPL-3.0, NOTICE,
   deployment                                      SETUP_AND_DEPLOYMENT,
-                                                  110 unit tests, 5 E2E
+                                                  110 unit tests, 10 E2E
   -----------------------------------------------------------------------

@@ -84,9 +84,14 @@ export function useAutosave(editor: Editor | null, options: AutosaveOptions) {
   }
 
   const save = useCallback(async (force = false) => {
-    if (!editor || !isInitializedRef.current) return
+    if (!editor || editor.isDestroyed || !editor.view || !isInitializedRef.current) return
     
-    const content = editor.getHTML()
+    let content = ''
+    try {
+      content = editor.getHTML()
+    } catch {
+      return
+    }
     if (!force && content === lastContentRef.current) return
     
     // Check if content actually changed

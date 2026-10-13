@@ -196,6 +196,8 @@ export interface GoalProgress {
 
 /** Daily writing statistics */
 export interface DailyStats {
+  /** Optional ID for IndexedDB persistence */
+  id?: EntityId
   /** Date in YYYY-MM-DD format (user's timezone) */
   date: string
   /** Project ID */

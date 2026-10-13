@@ -15,6 +15,8 @@ export default defineConfig({
       '@lib': path.resolve(__dirname, './src/lib'),
       '@hooks': path.resolve(__dirname, './src/hooks'),
       '@types': path.resolve(__dirname, './src/types'),
+      'react-router': path.resolve(__dirname, './src/lib/router.tsx'),
+      'react-router-dom': path.resolve(__dirname, './src/lib/router.tsx'),
     },
   },
   test: {
@@ -29,6 +31,8 @@ export default defineConfig({
         '@lib': path.resolve(__dirname, './src/lib'),
         '@hooks': path.resolve(__dirname, './src/hooks'),
         '@types': path.resolve(__dirname, './src/types'),
+        'react-router': path.resolve(__dirname, './src/lib/router.tsx'),
+        'react-router-dom': path.resolve(__dirname, './src/lib/router.tsx'),
       },
     },
     coverage: {

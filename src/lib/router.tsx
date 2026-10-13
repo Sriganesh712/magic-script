@@ -443,3 +443,16 @@ export function RouterProvider({ router }: { router: RouterInstance }) {
     </BrowserRouter>
   )
 }
+
+export function MemoryRouter({
+  children,
+  initialEntries,
+}: {
+  children: ReactNode
+  initialEntries?: string[]
+}) {
+  if (initialEntries && initialEntries.length > 0 && typeof window !== 'undefined') {
+    window.history.replaceState(null, '', initialEntries[0])
+  }
+  return <BrowserRouter>{children}</BrowserRouter>
+}

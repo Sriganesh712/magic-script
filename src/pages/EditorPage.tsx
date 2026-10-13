@@ -99,10 +99,10 @@ export function EditorPage() {
   } | null>(null)
   const [exportingFormat, setExportingFormat] = useState<'PDF' | 'Fountain' | 'FDX' | null>(null)
 
-  // Editor references
   const editorRef = useRef<any>(null)
   const [editorInstance, setEditorInstance] = useState<any>(null)
   const lastSavedContentRef = useRef<string>('')
+  const lastSavedWordCountRef = useRef<number>(0)
 
   const { isOnline, wasOffline } = useOnlineStatus()
 
@@ -188,6 +188,7 @@ export function EditorPage() {
           const text = initialText.replace(/<[^>]*>/g, ' ')
           const words = text.trim().split(/\s+/).filter((w) => w.length > 0).length
           setWordCount(words)
+          lastSavedWordCountRef.current = words
         }
       } catch (err) {
         console.error('[EditorPage] Error loading screenplay data:', err)
@@ -215,10 +216,78 @@ export function EditorPage() {
     draftId: (draft?.id || generateId()) as EntityId,
     projectId: (project?.id || generateId()) as EntityId,
     debounceMs: 2000,
-    onSave: (saved) => {
+    onSave: async (saved) => {
       if (saved && screenplay?.id) {
         lastSavedContentRef.current = content
         localStorage.setItem(`screenplay_content_${screenplay.id}`, content)
+
+        if (project?.id) {
+          const prevWords = lastSavedWordCountRef.current
+          const diff = wordCount - prevWords
+
+          if (diff !== 0) {
+            const wordsAdded = Math.max(0, diff)
+            const wordsDeleted = Math.max(0, -diff)
+            const today = new Date().toISOString().split('T')[0]
+            const nowTs = Date.now() as Timestamp
+
+            try {
+              // 1. Record writing session in IndexedDB
+              await db.writingSessions.add({
+                id: generateId(),
+                projectId: project.id,
+                draftId: (draft?.id || generateId()) as EntityId,
+                startTime: nowTs,
+                endTime: nowTs,
+                wordsAdded,
+                wordsDeleted,
+                netWords: diff,
+                countsForStreak: wordsAdded > 0,
+                state: 'completed',
+              })
+
+              // 2. Record or update daily stats
+              const existingStat = await db.dailyStats
+                .where('projectId')
+                .equals(project.id)
+                .filter((s) => s.date === today)
+                .first()
+
+              if (existingStat && existingStat.id) {
+                await db.dailyStats.update(existingStat.id, {
+                  wordsAdded: (existingStat.wordsAdded || 0) + wordsAdded,
+                  wordsDeleted: (existingStat.wordsDeleted || 0) + wordsDeleted,
+                  netWords: (existingStat.netWords || 0) + diff,
+                  sessionCount: (existingStat.sessionCount || 0) + 1,
+                })
+              } else {
+                await db.dailyStats.add({
+                  id: generateId(),
+                  projectId: project.id,
+                  date: today,
+                  wordsAdded,
+                  wordsDeleted,
+                  netWords: diff,
+                  sessionCount: 1,
+                  totalSessionTime: 60000,
+                  goalsMet: [],
+                  isWritingDay: wordsAdded > 0,
+                })
+              }
+
+              lastSavedWordCountRef.current = wordCount
+
+              // 3. Dispatch real-time cross-component and cross-tab update
+              window.dispatchEvent(
+                new CustomEvent('screenplay:data-changed', {
+                  detail: { projectId: project.id, words: wordCount, diff },
+                })
+              )
+            } catch (err) {
+              console.warn('[Analytics] Failed to record writing session:', err)
+            }
+          }
+        }
       }
     },
     onError: (err) => {

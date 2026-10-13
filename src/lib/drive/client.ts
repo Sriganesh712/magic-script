@@ -366,15 +366,43 @@ export async function uploadToGoogleDrive(params: {
   // Track last sync time
   saveDriveAuthState({ lastSyncAt: Date.now() as any })
 
-  return {
+  const uploadedItem: DriveFileMetadata = {
     id: result.id,
     name: result.name || params.filename,
     mimeType: result.mimeType || fileMimeType,
     exportFormat: params.format,
     size: parseInt(result.size, 10) || params.blob.size,
-    createdTime: result.createdTime,
+    createdTime: result.createdTime || new Date().toISOString(),
+    modifiedTime: result.modifiedTime || new Date().toISOString(),
     webViewLink: result.webViewLink,
     projectId: params.projectId,
+  }
+
+  // Update real-time local cache and notify listeners
+  try {
+    const raw = localStorage.getItem('screenplay_studio_drive_files_cache')
+    const prev: DriveFileMetadata[] = raw ? JSON.parse(raw) : []
+    const updated = [uploadedItem, ...prev.filter((f) => f.id !== uploadedItem.id)]
+    localStorage.setItem('screenplay_studio_drive_files_cache', JSON.stringify(updated))
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('screenplay:cloud-backup', { detail: uploadedItem }))
+    }
+  } catch {
+    // Ignore storage errors
+  }
+
+  return uploadedItem
+}
+
+/**
+ * Returns cached Google Drive files from local storage for instant dashboard rendering.
+ */
+export function getCachedDriveFiles(): DriveFileMetadata[] {
+  try {
+    const raw = localStorage.getItem('screenplay_studio_drive_files_cache')
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
   }
 }
 
@@ -383,7 +411,7 @@ export async function uploadToGoogleDrive(params: {
  */
 export async function listDriveFiles(): Promise<DriveFileMetadata[]> {
   const auth = getDriveAuthState()
-  if (!auth.accessToken || !auth.isConnected) return []
+  if (!auth.accessToken || !auth.isConnected) return getCachedDriveFiles()
 
   try {
     const folderId = await getOrCreateAppFolder(auth.accessToken)
@@ -396,22 +424,41 @@ export async function listDriveFiles(): Promise<DriveFileMetadata[]> {
       headers: { Authorization: `Bearer ${auth.accessToken}` },
     })
 
-    if (!res.ok) return []
+    if (!res.ok) return getCachedDriveFiles()
 
     const data = await res.json()
-    return (data.files || []).map((f: any) => ({
-      id: f.id,
-      name: f.name,
-      mimeType: f.mimeType,
-      exportFormat: (f.properties?.format as DriveExportFormat) || 'PDF',
-      size: parseInt(f.size, 10) || 0,
-      createdTime: f.createdTime,
-      modifiedTime: f.modifiedTime,
-      webViewLink: f.webViewLink,
-      projectId: f.properties?.projectId,
-    }))
+    const files: DriveFileMetadata[] = (data.files || []).map((f: any) => {
+      const extFormat: DriveExportFormat = f.name?.endsWith('.fountain')
+        ? 'Fountain'
+        : f.name?.endsWith('.fdx')
+        ? 'FDX'
+        : f.name?.endsWith('.json')
+        ? 'JSON'
+        : 'PDF'
+
+      return {
+        id: f.id,
+        name: f.name,
+        mimeType: f.mimeType,
+        exportFormat: (f.properties?.format as DriveExportFormat) || extFormat,
+        size: parseInt(f.size, 10) || 0,
+        createdTime: f.createdTime,
+        modifiedTime: f.modifiedTime,
+        webViewLink: f.webViewLink,
+        projectId: f.properties?.projectId,
+      }
+    })
+
+    // Cache files for instant subsequent loads
+    try {
+      localStorage.setItem('screenplay_studio_drive_files_cache', JSON.stringify(files))
+    } catch {
+      // Ignore storage errors
+    }
+
+    return files
   } catch (err) {
     console.error('[GoogleDrive] List error:', err)
-    return []
+    return getCachedDriveFiles()
   }
 }

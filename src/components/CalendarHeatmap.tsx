@@ -130,7 +130,7 @@ export function CalendarHeatmap({
 
   // Intensity color mapping
   const getColorClass = (count: number) => {
-    if (count <= 0) return 'bg-muted/40 dark:bg-slate-800/80 hover:ring-1 hover:ring-foreground/20'
+    if (count <= 0) return 'bg-neutral-100 dark:bg-slate-800/80 border border-neutral-200/60 dark:border-transparent hover:ring-1 hover:ring-foreground/20'
     if (count <= 250) return 'bg-emerald-200 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800/60'
     if (count <= 500) return 'bg-emerald-400 dark:bg-emerald-700'
     if (count <= 1000) return 'bg-emerald-600 dark:bg-emerald-500'
@@ -240,7 +240,7 @@ export function CalendarHeatmap({
             <span className="text-[11px]">365 days of writing history</span>
             <div className="flex items-center gap-1.5 text-[11px]">
               <span>Less</span>
-              <span className="w-2.5 h-2.5 rounded-xs bg-muted/40 dark:bg-slate-800/80" />
+              <span className="w-2.5 h-2.5 rounded-xs bg-neutral-100 dark:bg-slate-800/80 border border-neutral-200/60 dark:border-transparent" />
               <span className="w-2.5 h-2.5 rounded-xs bg-emerald-200 dark:bg-emerald-950 border border-emerald-300 dark:border-emerald-800/60" />
               <span className="w-2.5 h-2.5 rounded-xs bg-emerald-400 dark:bg-emerald-700" />
               <span className="w-2.5 h-2.5 rounded-xs bg-emerald-600 dark:bg-emerald-500" />

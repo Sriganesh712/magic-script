@@ -745,10 +745,10 @@ export function DashboardPage() {
           {/* Cloud Status Badges Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {/* Google Drive Status */}
-            <div className="p-3.5 rounded-xl border border-black/[0.05] dark:border-white/[0.06] bg-neutral-50/60 dark:bg-neutral-800/40 space-y-1.5">
+            <div className="p-3.5 rounded-xl border border-border/70 bg-neutral-50/80 dark:bg-neutral-900/50 space-y-1.5 shadow-2xs">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-foreground flex items-center gap-1.5">
-                  <HardDrive className="w-3.5 h-3.5 text-blue-500" />
+                  <HardDrive className="w-3.5 h-3.5 text-[#7E4A8E] dark:text-[#9A6AA8]" />
                   Google Drive Backup
                 </span>
                 <Badge
@@ -775,7 +775,7 @@ export function DashboardPage() {
             </div>
 
             {/* Supabase Database Sync Status */}
-            <div className="p-3.5 rounded-xl border border-black/[0.05] dark:border-white/[0.06] bg-neutral-50/60 dark:bg-neutral-800/40 space-y-1.5">
+            <div className="p-3.5 rounded-xl border border-border/70 bg-neutral-50/80 dark:bg-neutral-900/50 space-y-1.5 shadow-2xs">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-foreground flex items-center gap-1.5">
                   <Database className="w-3.5 h-3.5 text-emerald-500" />
@@ -816,10 +816,10 @@ export function DashboardPage() {
             </div>
 
             {/* Cloud Files Summary */}
-            <div className="p-3.5 rounded-xl border border-black/[0.05] dark:border-white/[0.06] bg-neutral-50/60 dark:bg-neutral-800/40 space-y-1.5">
+            <div className="p-3.5 rounded-xl border border-border/70 bg-neutral-50/80 dark:bg-neutral-900/50 space-y-1.5 shadow-2xs">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-foreground flex items-center gap-1.5">
-                  <FileText className="w-3.5 h-3.5 text-purple-500" />
+                  <FileText className="w-3.5 h-3.5 text-[#7E4A8E] dark:text-[#9A6AA8]" />
                   Cloud Backups Stored
                 </span>
                 <span className="font-bold text-foreground text-sm">
@@ -1176,9 +1176,9 @@ export function DashboardPage() {
                 </div>
 
                 {/* Dual-Tone Rounded Progress Bar */}
-                <div className="w-full h-3 rounded-full bg-sf-tertiary overflow-hidden p-0.5 border border-st-secondary">
+                <div className="w-full h-3 rounded-full bg-neutral-200/70 dark:bg-neutral-800 overflow-hidden p-0.5 border border-border/60">
                   <div
-                    className="h-full rounded-full bg-[#1e2033] dark:bg-sr-indigo-400 transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
+                    className="h-full rounded-full bg-gradient-to-r from-[#7E4A8E] to-[#9A6AA8] transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                     style={{ width: `${Math.min(100, goal.percent)}%` }}
                   />
                 </div>

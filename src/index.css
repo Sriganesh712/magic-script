@@ -24,7 +24,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Sarvam AI Surfaces, Text & Strokes */
+  /* Sarvam AI & Mono-Plum Surfaces, Text & Strokes */
   --color-sf: var(--sf);
   --color-sf-secondary: var(--sf-secondary);
   --color-sf-tertiary: var(--sf-tertiary);
@@ -34,7 +34,11 @@
   --color-st: var(--st);
   --color-st-secondary: var(--st-secondary);
 
-  /* Sarvam AI Indigo & Saffron Accents */
+  /* Mono-Plum & Indigo Accents */
+  --color-primary-soft: var(--color-primary-soft);
+  --color-primary-ink: var(--color-primary-ink);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-accent-ink: var(--color-accent-ink);
   --color-sr-indigo-50: #eef2ff;
   --color-sr-indigo-100: #e0e7ff;
   --color-sr-indigo-200: #c7d2fe;
@@ -50,7 +54,7 @@
   --color-sr-orange-700: #c2410c;
   --color-sr-slate: #1e2033;
 
-  /* Typography matching Sarvam AI */
+  /* Typography matching Sarvam AI & Apple Standards */
   --font-matter: "Plus Jakarta Sans", "Matter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-season-mix: "Newsreader", "The Seasons", "Playfair Display", Georgia, serif;
   --font-sans: var(--font-matter);
@@ -76,67 +80,82 @@
 }
 
 :root {
-  /* Sarvam Warm Ivory Canvas & Refined Indigo Tones */
-  --background: #fbfbfa;
-  --foreground: #1e2033;
+  /* Apple / Square Clean Neutral Canvas with Refined Mono-Plum & Slate Tones */
+  --background: #f7f8fa;
+  --foreground: #111827;
   --card: #ffffff;
-  --card-foreground: #1e2033;
+  --card-foreground: #111827;
   --popover: #ffffff;
-  --popover-foreground: #1e2033;
-  --primary: #1e2033;
+  --popover-foreground: #111827;
+  --primary: #7E4A8E;
   --primary-foreground: #ffffff;
-  --secondary: #f3f4f8;
-  --secondary-foreground: #1e2033;
-  --muted: #f3f4f8;
-  --muted-foreground: #595e73;
-  --accent: #eef2ff;
-  --accent-foreground: #312e81;
+  --secondary: #eee7f0;
+  --secondary-foreground: #161614;
+  --muted: #f1f3f7;
+  --muted-foreground: #475569;
+  --accent: #f2ecf4;
+  --accent-foreground: #5b3566;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: rgba(30, 32, 51, 0.09);
-  --input: rgba(30, 32, 51, 0.12);
-  --ring: #4f46e5;
+  --border: rgba(0, 0, 0, 0.08);
+  --input: rgba(0, 0, 0, 0.12);
+  --ring: #7E4A8E;
   --radius: 1rem;
 
-  /* Sarvam Semantic Variables */
-  --sf: #fbfbfa;
-  --sf-secondary: #f3f4f8;
-  --sf-tertiary: #ebecef;
-  --tx: #1e2033;
-  --tx-secondary: #595e73;
-  --tx-tertiary: #8c92a4;
-  --st: rgba(30, 32, 51, 0.1);
-  --st-secondary: rgba(30, 32, 51, 0.06);
+  /* Mono-Plum Semantic Tokens */
+  --color-primary: #7E4A8E;
+  --color-primary-soft: #eee7f0;
+  --color-primary-ink: #5b3566;
+  --color-accent: #9A6AA8;
+  --color-accent-soft: #f2ecf4;
+  --color-accent-ink: #6f4c79;
+
+  /* Surfaces & High-Contrast Typography Tokens */
+  --sf: #f7f8fa;
+  --sf-secondary: #f1f3f7;
+  --sf-tertiary: #e5e8ef;
+  --tx: #111827;
+  --tx-secondary: #475569;
+  --tx-tertiary: #64748b;
+  --st: rgba(0, 0, 0, 0.08);
+  --st-secondary: rgba(0, 0, 0, 0.05);
 }
 
 .dark {
-  /* Sarvam Midnight Indigo Atmosphere */
-  --background: #0b0d18;
-  --foreground: #f1f3f9;
-  --card: #141728;
-  --card-foreground: #f1f3f9;
-  --popover: #181b30;
-  --popover-foreground: #f1f3f9;
-  --primary: #f1f3f9;
-  --primary-foreground: #0b0d18;
-  --secondary: #1a1e33;
-  --secondary-foreground: #f1f3f9;
-  --muted: #1a1e33;
-  --muted-foreground: #8c92a4;
-  --accent: #1e233d;
-  --accent-foreground: #e0e7ff;
+  /* Midnight Atmosphere with Luminous Plum & Slate Tones */
+  --background: #0d0f17;
+  --foreground: #f8fafc;
+  --card: #151826;
+  --card-foreground: #f8fafc;
+  --popover: #181c2d;
+  --popover-foreground: #f8fafc;
+  --primary: #9A6AA8;
+  --primary-foreground: #ffffff;
+  --secondary: #22263d;
+  --secondary-foreground: #f8fafc;
+  --muted: #1c2035;
+  --muted-foreground: #94a3b8;
+  --accent: #272136;
+  --accent-foreground: #f2ecf4;
   --destructive: #f87171;
   --destructive-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.08);
   --input: rgba(255, 255, 255, 0.14);
-  --ring: #818cf8;
+  --ring: #9A6AA8;
 
-  --sf: #0b0d18;
-  --sf-secondary: #141728;
-  --sf-tertiary: #1d2138;
-  --tx: #f1f3f9;
-  --tx-secondary: #a1a7c0;
-  --tx-tertiary: #6e748d;
+  --color-primary: #9A6AA8;
+  --color-primary-soft: #272136;
+  --color-primary-ink: #f2ecf4;
+  --color-accent: #9A6AA8;
+  --color-accent-soft: #272136;
+  --color-accent-ink: #f2ecf4;
+
+  --sf: #0d0f17;
+  --sf-secondary: #151826;
+  --sf-tertiary: #1f243b;
+  --tx: #f8fafc;
+  --tx-secondary: #a0aabf;
+  --tx-tertiary: #717d98;
   --st: rgba(255, 255, 255, 0.1);
   --st-secondary: rgba(255, 255, 255, 0.06);
 }
@@ -200,13 +219,14 @@ body {
   font-family: var(--font-matter);
   font-weight: 500;
   color: #ffffff;
-  background: linear-gradient(to bottom, #3a3f5c 0%, #1e2033 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+  background: linear-gradient(to bottom, #2b2735 0%, #16151f 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -2px 0 rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.12);
   transition: all 350ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .btn-sarvam-dark:hover {
-  background: linear-gradient(to bottom, #444a6e 0%, #25283f 100%);
+  background: linear-gradient(to bottom, #3f384c 0%, #221f2d 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 3px 10px rgba(0, 0, 0, 0.16);
 }
 
 .btn-sarvam-dark:active {
@@ -222,14 +242,14 @@ body {
   font-family: var(--font-matter);
   font-weight: 500;
   color: var(--foreground);
-  background: linear-gradient(to bottom, #ffffff 0%, #f0f1f5 100%);
-  box-shadow: inset 0 0 0 1px rgba(30, 32, 51, 0.12), inset 0 2px 0 rgba(200, 200, 200, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: all 350ms cubic-bezier(0.2, 0, 0, 1);
 }
 
 .btn-sarvam-light:hover {
-  background: #ffffff;
-  box-shadow: inset 0 0 0 1px rgba(30, 32, 51, 0.16), 0 2px 8px rgba(0, 0, 0, 0.04);
+  background: #f8f9fa;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .btn-sarvam-light:active {
@@ -238,13 +258,13 @@ body {
 }
 
 .dark .btn-sarvam-light {
-  background: linear-gradient(to bottom, #1d2138 0%, #141728 100%);
-  color: #f1f3f9;
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: #181c2d;
+  color: #f8fafc;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 .dark .btn-sarvam-light:hover {
-  background: #232845;
+  background: #22273e;
 }
 
 /* Hairline Radial Glow Divider from Sarvam */

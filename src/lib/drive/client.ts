@@ -149,7 +149,7 @@ export async function requestGoogleDriveAccess(clientId?: string): Promise<{ suc
             if (response.error === 'popup_closed_by_user') {
               errMsg = 'Sign-in popup was closed before completing authorization.'
             } else if (response.error === 'access_denied') {
-              errMsg = 'Permission to access Google Drive was denied.'
+              errMsg = 'Access blocked (Error 403: access_denied). In Google Cloud Console > OAuth consent screen > "Test users", add your email address as a developer-approved tester, or publish the app.'
             }
             resolve({ success: false, error: errMsg })
             return

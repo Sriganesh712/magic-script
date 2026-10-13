@@ -50,18 +50,18 @@ export function StatsCard({
   return (
     <Card
       className={cn(
-        'relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card',
+        'relative overflow-hidden rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-md hover:border-black/15 dark:hover:border-white/20 hover:-translate-y-0.5 font-matter',
         className
       )}
     >
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">
+            <p className="text-[11px] font-semibold text-tx-tertiary uppercase tracking-[1.5px] truncate font-matter">
               {label}
             </p>
             <div className="mt-1.5 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-sans">
+              <span className="text-2xl sm:text-3xl font-bold tracking-tight text-tx font-matter">
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </span>
             </div>
@@ -70,12 +70,12 @@ export function StatsCard({
               <div className="mt-2.5 flex items-center gap-1.5 text-xs">
                 <span
                   className={cn(
-                    'inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-[11px]',
+                    'inline-flex items-center gap-1 font-semibold px-2.5 py-0.5 rounded-full text-[11px] transition-colors',
                     trend.isPositive === true
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                      ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20'
                       : trend.isPositive === false
-                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
-                      : 'bg-muted text-muted-foreground border border-border'
+                      ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20'
+                      : 'bg-sf-secondary text-tx-secondary border border-st-secondary'
                   )}
                 >
                   {TrendIcon && <TrendIcon className="w-3 h-3 shrink-0" />}
@@ -84,19 +84,19 @@ export function StatsCard({
                   </span>
                 </span>
                 {trend.label && (
-                  <span className="text-muted-foreground text-[11px] truncate">{trend.label}</span>
+                  <span className="text-tx-tertiary text-[11px] truncate font-matter">{trend.label}</span>
                 )}
               </div>
             )}
 
             {description && !trend && (
-              <p className="mt-2 text-xs text-muted-foreground line-clamp-1">{description}</p>
+              <p className="mt-2 text-xs text-tx-secondary line-clamp-1 font-matter">{description}</p>
             )}
           </div>
 
           <div
             className={cn(
-              'flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-transform duration-200 group-hover:scale-105 shadow-2xs',
+              'flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-transform duration-350 ease-[cubic-bezier(0.2,0,0,1)] hover:scale-105 shadow-2xs',
               iconColor
             )}
             aria-hidden="true"

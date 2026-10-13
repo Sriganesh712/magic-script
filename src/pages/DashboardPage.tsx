@@ -637,30 +637,48 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-7 font-sans">
-      {/* Top Header & Project Selector (Apple & Square style) */}
+    <div className="relative p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8 font-matter overflow-hidden">
+      {/* Sarvam Signature Radiant Hero Glow (from image.png) */}
+      <div
+        className="absolute -top-20 left-1/2 -translate-x-1/2 -z-10 w-[95%] max-w-5xl h-80 pointer-events-none opacity-35 dark:opacity-15 blur-[90px] rounded-full"
+        style={{
+          background: 'radial-gradient(ellipse, #FF8A34 0%, #FFA24C 25%, #C7D2FE 55%, transparent 75%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Decorative hairline motif */}
+      <div className="flex flex-col items-center gap-2 max-w-md mx-auto pt-1">
+        <div className="w-full h-px" style={{ background: 'radial-gradient(circle, #6a88e2 0%, transparent 100%)' }} />
+        <p className="px-6 font-matter text-sr-indigo-900 dark:text-sr-indigo-300 text-xs sm:text-sm font-semibold tracking-wider uppercase">
+          Real-Time Screenwriting Analytics
+        </p>
+        <div className="w-full h-px" style={{ background: 'radial-gradient(circle, #6a88e2 0%, transparent 100%)' }} />
+      </div>
+
+      {/* Top Header & Project Selector */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <h1 className="font-season-mix text-2xl sm:text-4xl font-medium text-tx tracking-tight">
               Writing Dashboard
             </h1>
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 font-matter">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Live Realtime Sync
             </span>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-tx-secondary mt-1 font-matter">
             Real-time tracking of cloud backups, writing output, streaks, and screenplay milestones.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           <Select value={selectedProjectId} onValueChange={setSelectedProjectId}>
-            <SelectTrigger className="w-[180px] sm:w-[200px] bg-card rounded-full border-black/[0.08] dark:border-white/[0.1] text-xs h-8">
+            <SelectTrigger className="w-[180px] sm:w-[200px] bg-white dark:bg-[#141728] rounded-full border-st text-xs h-9 font-matter shadow-2xs">
               <SelectValue placeholder="All Projects" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-2xl border-st font-matter">
               <SelectItem value="all">All Projects</SelectItem>
               {projects.map((p) => (
                 <SelectItem key={p.id} value={p.id}>
@@ -675,7 +693,7 @@ export function DashboardPage() {
             size="sm"
             onClick={() => loadAnalyticsData(true)}
             disabled={isRefreshing}
-            className="rounded-full gap-1.5 h-8 px-3 text-xs border-black/[0.08] dark:border-white/[0.1]"
+            className="btn-sarvam-light gap-1.5 h-9 px-3.5 text-xs cursor-pointer"
             title="Refresh cloud files and analytics"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -686,7 +704,7 @@ export function DashboardPage() {
             variant="ghost"
             size="sm"
             onClick={handleResetAnalytics}
-            className="rounded-full gap-1.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 px-3"
+            className="rounded-full gap-1.5 text-xs text-tx-tertiary hover:text-destructive hover:bg-destructive/10 h-9 px-3 cursor-pointer"
             title="Clear demo writing history and reset to 0"
           >
             <Trash2 className="w-3.5 h-3.5" />
@@ -695,25 +713,25 @@ export function DashboardPage() {
         </div>
       </div>
 
-      {/* Realtime Cloud Saved Data & Synchronization Section (Apple iCloud Drive widget) */}
-      <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs">
-        <CardHeader className="pb-3 border-b border-black/[0.04] dark:border-white/[0.05]">
+      {/* Realtime Cloud Saved Data & Synchronization Section */}
+      <Card className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)]">
+        <CardHeader className="pb-3 border-b border-st-secondary">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <Cloud className="w-4 h-4 text-primary" />
+              <CardTitle className="font-season-mix text-lg font-medium text-tx flex items-center gap-2">
+                <Cloud className="w-4 h-4 text-sr-indigo-600 dark:text-sr-indigo-400" />
                 <span>Cloud Saved Data (Realtime)</span>
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
+              <CardDescription className="text-xs text-tx-tertiary font-matter">
                 Active cloud backups in Google Drive and database sync state
               </CardDescription>
             </div>
 
             <div className="flex items-center gap-2 self-start sm:self-auto">
-              <span className="text-[11px] text-muted-foreground hidden sm:inline">
+              <span className="text-[11px] text-tx-tertiary font-matter hidden sm:inline">
                 Last checked: {lastRefreshedAt.toLocaleTimeString()}
               </span>
-              <Button variant="ghost" size="xs" asChild className="gap-1 text-xs h-7 text-primary rounded-full">
+              <Button variant="ghost" size="xs" asChild className="gap-1 text-xs h-7 text-sr-indigo-600 hover:text-sr-indigo-700 dark:text-sr-indigo-400 rounded-full font-matter">
                 <Link to="/settings">
                   <ExternalLink className="w-3 h-3" />
                   <span>Configure Cloud</span>
@@ -941,32 +959,32 @@ export function DashboardPage() {
         />
       </div>
 
-      {/* Main Analytics Line Chart (Square "Sales" Chart Inspired - image.png) */}
-      <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
-        <CardHeader className="pb-2">
+      {/* Main Analytics Line Chart (Square & Sarvam curve aesthetics) */}
+      <Card className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs overflow-hidden transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)]">
+        <CardHeader className="pb-2 border-b border-st-secondary">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-primary" />
+              <CardTitle className="font-season-mix text-lg font-medium text-tx flex items-center gap-2">
+                <BarChart3 className="w-4 h-4 text-sr-indigo-600 dark:text-sr-indigo-400" />
                 <span>Writing Sprints & Output</span>
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
+              <CardDescription className="text-xs text-tx-tertiary font-matter">
                 Intraday session output velocity and peak productivity timeline
               </CardDescription>
             </div>
 
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-4 text-xs font-matter">
               <div className="flex items-center gap-1.5">
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold">▲</span>
-                <span className="text-muted-foreground font-medium">Net Output:</span>
-                <span className="font-bold text-foreground">
+                <span className="text-tx-tertiary font-medium">Net Output:</span>
+                <span className="font-bold text-tx">
                   {metrics.todayWords > 0 ? metrics.todayWords : metrics.weeklyWords} words
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="text-emerald-600 dark:text-emerald-400 font-bold">▲</span>
-                <span className="text-muted-foreground font-medium">Sprints:</span>
-                <span className="font-bold text-foreground">
+                <span className="text-tx-tertiary font-medium">Sprints:</span>
+                <span className="font-bold text-tx">
                   {filteredSessions.length}
                 </span>
               </div>
@@ -975,16 +993,17 @@ export function DashboardPage() {
         </CardHeader>
 
         <CardContent className="pt-2 pb-4">
-          {/* Smooth SVG Curve Chart (Inspired by Square in image.png) */}
+          {/* Smooth SVG Curve Chart */}
           <div className="relative w-full overflow-hidden">
             <svg
               viewBox={`0 0 ${chartPoints.width} ${chartPoints.height}`}
               className="w-full h-48 sm:h-56 select-none"
             >
               <defs>
-                <linearGradient id="appleChartGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#0071e3" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#0071e3" stopOpacity="0.0" />
+                <linearGradient id="sarvamChartGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#4f46e5" stopOpacity="0.3" />
+                  <stop offset="60%" stopColor="#818cf8" stopOpacity="0.1" />
+                  <stop offset="100%" stopColor="#4f46e5" stopOpacity="0.0" />
                 </linearGradient>
               </defs>
 
@@ -1014,14 +1033,13 @@ export function DashboardPage() {
               />
 
               {/* Gradient Area under curve */}
-              <path d={chartPoints.areaD} fill="url(#appleChartGradient)" />
+              <path d={chartPoints.areaD} fill="url(#sarvamChartGradient)" />
 
               {/* Smooth Bezier Line */}
               <path
                 d={chartPoints.pathD}
                 fill="none"
-                stroke="#1d1d1f"
-                className="stroke-neutral-900 dark:stroke-white"
+                className="stroke-[#4f46e5] dark:stroke-[#818cf8]"
                 strokeWidth="2.5"
                 strokeLinecap="round"
               />
@@ -1111,61 +1129,61 @@ export function DashboardPage() {
         <CalendarHeatmap
           data={heatmapData}
           title="Writing Activity Calendar"
-          className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] shadow-xs"
+          className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 shadow-xs font-matter"
         />
       </div>
 
-      {/* Two Column Section: Goals (Quicken style image2.png) & Patterns */}
+      {/* Two Column Section: Goals & Patterns */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Active Goals Section (Quicken Spending Plan inspired) */}
-        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs">
-          <CardHeader className="pb-3 border-b border-black/[0.04] dark:border-white/[0.05]">
+        {/* Active Goals Section */}
+        <Card className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)]">
+          <CardHeader className="pb-3 border-b border-st-secondary">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Target className="w-4 h-4 text-primary" />
+                <CardTitle className="font-season-mix text-lg font-medium text-tx flex items-center gap-2">
+                  <Target className="w-4 h-4 text-sr-indigo-600 dark:text-sr-indigo-400" />
                   <span>Writing Goals</span>
                 </CardTitle>
-                <CardDescription className="text-xs text-muted-foreground">
+                <CardDescription className="text-xs text-tx-tertiary font-matter">
                   Active milestones and target word counts
                 </CardDescription>
               </div>
-              <Badge variant="secondary" className="text-xs rounded-full font-semibold">
+              <Badge variant="secondary" className="text-xs rounded-full font-semibold font-matter bg-sf-secondary text-tx-secondary border border-st-secondary">
                 {activeGoals.filter((g) => g.isMet).length} of {activeGoals.length} Met
               </Badge>
             </div>
           </CardHeader>
 
-          <CardContent className="space-y-4 pt-4">
+          <CardContent className="space-y-4 pt-4 font-matter">
             {activeGoals.map((goal) => (
               <div
                 key={goal.id}
-                className="space-y-2 p-3.5 rounded-xl bg-neutral-50/70 dark:bg-neutral-800/40 border border-black/[0.04] dark:border-white/[0.05]"
+                className="space-y-2 p-3.5 rounded-xl bg-sf-secondary/70 border border-st-secondary"
               >
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                  <span className="font-semibold text-tx flex items-center gap-1.5">
                     {goal.isMet ? (
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     ) : (
-                      <Hourglass className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                      <Hourglass className="w-3.5 h-3.5 text-tx-tertiary shrink-0" />
                     )}
                     {goal.title}
                   </span>
-                  <span className="font-medium text-muted-foreground">
-                    <strong className="text-foreground">{goal.current.toLocaleString()}</strong> /{' '}
+                  <span className="font-medium text-tx-secondary">
+                    <strong className="text-tx">{goal.current.toLocaleString()}</strong> /{' '}
                     {goal.target.toLocaleString()} words
                   </span>
                 </div>
 
-                {/* Quicken Dual-Tone Rounded Progress Bar (image2.png style) */}
-                <div className="w-full h-3 rounded-full bg-neutral-200 dark:bg-neutral-700/80 overflow-hidden p-0.5">
+                {/* Dual-Tone Rounded Progress Bar */}
+                <div className="w-full h-3 rounded-full bg-sf-tertiary overflow-hidden p-0.5 border border-st-secondary">
                   <div
-                    className="h-full rounded-full bg-neutral-900 dark:bg-white transition-all duration-500"
+                    className="h-full rounded-full bg-[#1e2033] dark:bg-sr-indigo-400 transition-all duration-500 ease-[cubic-bezier(0.2,0,0,1)]"
                     style={{ width: `${Math.min(100, goal.percent)}%` }}
                   />
                 </div>
 
-                <div className="flex items-center justify-between text-[11px] text-muted-foreground pt-0.5">
+                <div className="flex items-center justify-between text-[11px] text-tx-tertiary pt-0.5">
                   <span>{goal.percent}% completed</span>
                   {goal.isMet && (
                     <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
@@ -1179,13 +1197,13 @@ export function DashboardPage() {
         </Card>
 
         {/* Real Writing Consistency & Patterns */}
-        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs">
-          <CardHeader className="pb-3 border-b border-black/[0.04] dark:border-white/[0.05]">
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <BarChart3 className="w-4 h-4 text-primary" />
+        <Card className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)]">
+          <CardHeader className="pb-3 border-b border-st-secondary">
+            <CardTitle className="font-season-mix text-lg font-medium text-tx flex items-center gap-2">
+              <BarChart3 className="w-4 h-4 text-sr-indigo-600 dark:text-sr-indigo-400" />
               <span>Writing Patterns & Consistency</span>
             </CardTitle>
-            <CardDescription className="text-xs text-muted-foreground">
+            <CardDescription className="text-xs text-tx-tertiary font-matter">
               Real output breakdown by day of week and peak productivity
             </CardDescription>
           </CardHeader>
@@ -1250,21 +1268,21 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Sessions List (Quicken Recent Transactions style - image2.png) */}
-      <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs">
-        <CardHeader className="pb-3 border-b border-black/[0.04] dark:border-white/[0.05]">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-primary" />
+      {/* Recent Sessions List */}
+      <Card className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)] font-matter">
+        <CardHeader className="pb-3 border-b border-st-secondary">
+          <CardTitle className="font-season-mix text-lg font-medium text-tx flex items-center gap-2">
+            <Clock className="w-4 h-4 text-sr-indigo-600 dark:text-sr-indigo-400" />
             <span>Recent Writing Sessions</span>
           </CardTitle>
-          <CardDescription className="text-xs text-muted-foreground">
+          <CardDescription className="text-xs text-tx-tertiary font-matter">
             Log of recent writing sprints and element updates
           </CardDescription>
         </CardHeader>
 
         <CardContent className="pt-2">
           {filteredSessions.length > 0 ? (
-            <div className="divide-y divide-black/[0.04] dark:divide-white/[0.05]">
+            <div className="divide-y divide-st-secondary">
               {filteredSessions.slice(0, 5).map((session) => {
                 const projName = projectMap.get(session.projectId) || 'Screenplay Draft'
                 const sessionDate = new Date(session.startTime).toLocaleDateString(undefined, {
@@ -1280,21 +1298,21 @@ export function DashboardPage() {
                 return (
                   <div
                     key={session.id}
-                    className="py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-neutral-50/50 dark:hover:bg-neutral-800/40 rounded-xl px-2 transition-colors"
+                    className="py-3.5 flex items-center justify-between gap-4 text-xs hover:bg-sf-secondary/50 rounded-xl px-2 transition-colors duration-200"
                   >
                     <div className="min-w-0">
-                      <p className="font-semibold text-foreground truncate">{projName}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">
+                      <p className="font-semibold text-tx truncate">{projName}</p>
+                      <p className="text-[11px] text-tx-tertiary mt-0.5">
                         {sessionDate} at {sessionTime}
                       </p>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-xs">
+                      <span className="font-semibold text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs">
                         +{session.netWords || session.wordsAdded} words
                       </span>
                       {session.countsForStreak && (
-                        <span className="text-[11px] text-muted-foreground hidden sm:inline">
+                        <span className="text-[11px] text-tx-tertiary hidden sm:inline">
                           Streak Counted
                         </span>
                       )}
@@ -1304,7 +1322,7 @@ export function DashboardPage() {
               })}
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground text-xs">
+            <div className="text-center py-8 text-tx-tertiary text-xs">
               No recent writing sessions logged yet. Open an editor and start typing to record sessions in real time!
             </div>
           )}

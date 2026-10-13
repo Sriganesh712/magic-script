@@ -410,46 +410,75 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-7 font-sans">
-      {/* Top Header & Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Projects
-          </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-            Manage your screenplay library, outlines, and scripts.
+    <div className="relative p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-8 font-matter overflow-hidden">
+      {/* Sarvam Signature Hero Gradient Glow (from image.png) */}
+      <div
+        className="absolute -top-20 left-1/2 -translate-x-1/2 -z-10 w-[95%] max-w-5xl h-80 pointer-events-none opacity-35 dark:opacity-15 blur-[90px] rounded-full"
+        style={{
+          background: 'radial-gradient(ellipse, #FF8A34 0%, #FFA24C 25%, #C7D2FE 55%, transparent 75%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Hero Header Area (matching image.png aesthetic) */}
+      <div className="flex flex-col items-center text-center space-y-4 pt-4 pb-2">
+        {/* Motif hairline divider */}
+        <div className="flex flex-col items-center gap-2 w-full max-w-md mx-auto">
+          <div className="w-full h-px" style={{ background: 'radial-gradient(circle, #6a88e2 0%, transparent 100%)' }} />
+          <p className="px-6 font-matter text-sr-indigo-900 dark:text-sr-indigo-300 text-xs sm:text-sm font-semibold tracking-wider uppercase">
+            India's Sovereign Screenplay Studio
           </p>
+          <div className="w-full h-px" style={{ background: 'radial-gradient(circle, #6a88e2 0%, transparent 100%)' }} />
         </div>
 
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 px-4 h-9 gap-2 shadow-xs cursor-pointer font-medium self-start sm:self-auto text-xs"
-        >
-          <Plus className="w-4 h-4" />
-          <span>New Screenplay</span>
-        </Button>
+        <h1 className="font-season-mix text-3xl sm:text-5xl md:text-6xl text-tx leading-[1.08] tracking-tight max-w-3xl">
+          Stories Crafted for the Big Screen
+        </h1>
+
+        <p className="font-matter text-tx-secondary text-sm sm:text-base max-w-2xl leading-relaxed">
+          Distraction-free offline screenwriting backed by Dexie IndexedDB, with real-time cloud backups to Google Drive.
+        </p>
+
+        {/* Hero Action Buttons */}
+        <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+          <Button
+            onClick={() => setIsCreateOpen(true)}
+            className="btn-sarvam-dark px-6 py-2.5 h-10 gap-2 cursor-pointer font-medium text-sm shadow-sm"
+          >
+            <Plus className="w-4 h-4" />
+            <span>New Screenplay</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={handleSeedDemoProject}
+            className="btn-sarvam-light px-5 py-2.5 h-10 gap-2 cursor-pointer font-medium text-sm"
+          >
+            <Sparkles className="w-4 h-4 text-sr-orange-500" />
+            <span>Load Demo Screenplay</span>
+          </Button>
+        </div>
       </div>
 
-      {/* Search & Filter Bar (Apple Pill Style) */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
+      {/* Search & Filter Bar (Sarvam Pill Style) */}
+      <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-tx-tertiary" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search projects by title, genre, logline..."
-            className="pl-10 w-full bg-card rounded-full border-black/[0.08] dark:border-white/[0.1] text-xs h-9"
+            className="pl-10 w-full bg-white dark:bg-[#141728] rounded-full border-st text-xs h-10 font-matter focus-visible:ring-sr-indigo-600 shadow-2xs"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Filter className="w-4 h-4 text-muted-foreground shrink-0 hidden sm:block" />
+          <Filter className="w-4 h-4 text-tx-tertiary shrink-0 hidden sm:block" />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[160px] bg-card rounded-full border-black/[0.08] dark:border-white/[0.1] text-xs h-9">
+            <SelectTrigger className="w-full sm:w-[170px] bg-white dark:bg-[#141728] rounded-full border-st text-xs h-10 font-matter shadow-2xs">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl">
+            <SelectContent className="rounded-2xl border-st font-matter">
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="concept">Concept</SelectItem>
               <SelectItem value="outline">Outline</SelectItem>
@@ -466,7 +495,7 @@ export function ProjectsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse bg-muted/30 border-black/[0.05] dark:border-white/[0.06] rounded-2xl">
+            <Card key={i} className="animate-pulse bg-sf-secondary/50 border-st rounded-2xl">
               <CardHeader className="space-y-2">
                 <div className="h-5 bg-muted rounded-xl w-2/3" />
                 <div className="h-4 bg-muted rounded-xl w-1/3" />
@@ -484,20 +513,20 @@ export function ProjectsPage() {
             return (
               <Card
                 key={project.id}
-                className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/[0.08] hover:border-black/[0.15] dark:hover:border-white/[0.2] transition-all hover:shadow-md hover:-translate-y-0.5 bg-card overflow-hidden"
+                className="group relative flex flex-col justify-between rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl hover:border-black/15 dark:hover:border-white/20 transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)] hover:shadow-md hover:-translate-y-0.5 overflow-hidden font-matter shadow-2xs"
               >
                 <div>
-                  <CardHeader className="pb-3 border-b border-black/[0.04] dark:border-white/[0.05]">
+                  <CardHeader className="pb-3 border-b border-st-secondary">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <CardTitle
-                          className="text-base font-bold text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                          className="font-season-mix text-lg font-medium text-tx truncate cursor-pointer hover:text-sr-indigo-700 dark:hover:text-sr-indigo-400 transition-colors"
                           onClick={() => navigate(`/project/${project.id}`)}
                         >
                           {project.name}
                         </CardTitle>
                         {project.genre && (
-                          <CardDescription className="text-xs text-muted-foreground mt-0.5 truncate">
+                          <CardDescription className="text-xs text-tx-tertiary mt-0.5 truncate font-matter">
                             {project.genre}
                           </CardDescription>
                         )}
@@ -505,7 +534,7 @@ export function ProjectsPage() {
 
                       <Badge
                         variant={statusConfig.variant}
-                        className={cn('shrink-0 border font-semibold rounded-full text-[10px] px-2.5 py-0.5', statusConfig.badgeClass)}
+                        className={cn('shrink-0 border font-semibold rounded-full text-[10px] px-2.5 py-0.5 font-matter', statusConfig.badgeClass)}
                       >
                         {statusConfig.label}
                       </Badge>
@@ -513,29 +542,29 @@ export function ProjectsPage() {
                   </CardHeader>
 
                   <CardContent className="py-3.5 space-y-3">
-                    <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
+                    <p className="text-xs text-tx-secondary line-clamp-2 min-h-[2rem] font-matter">
                       {project.logline || 'No logline added yet. Click to open and begin writing.'}
                     </p>
 
-                    <div className="grid grid-cols-2 gap-2 py-2 px-3 rounded-xl bg-neutral-50/70 dark:bg-neutral-800/40 border border-black/[0.04] dark:border-white/[0.05] text-xs">
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <FileText className="w-3.5 h-3.5 text-primary" />
+                    <div className="grid grid-cols-2 gap-2 py-2 px-3 rounded-xl bg-sf-secondary/70 border border-st-secondary text-xs font-matter">
+                      <div className="flex items-center gap-1.5 text-tx-secondary">
+                        <FileText className="w-3.5 h-3.5 text-sr-indigo-600 dark:text-sr-indigo-400" />
                         <span>
-                          <strong className="text-foreground">{project.wordCount.toLocaleString()}</strong> words
+                          <strong className="text-tx">{project.wordCount.toLocaleString()}</strong> words
                         </span>
                       </div>
-                      <div className="flex items-center gap-1.5 text-muted-foreground">
-                        <Layers className="w-3.5 h-3.5 text-primary" />
+                      <div className="flex items-center gap-1.5 text-tx-secondary">
+                        <Layers className="w-3.5 h-3.5 text-sr-indigo-600 dark:text-sr-indigo-400" />
                         <span>
-                          Target: <strong className="text-foreground">{project.targetLength || 110}</strong> pgs
+                          Target: <strong className="text-tx">{project.targetLength || 110}</strong> pgs
                         </span>
                       </div>
                     </div>
                   </CardContent>
                 </div>
 
-                <CardFooter className="pt-3 border-t border-black/[0.04] dark:border-white/[0.05] flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1.5 text-[11px]">
+                <CardFooter className="pt-3 border-t border-st-secondary flex items-center justify-between text-xs text-tx-tertiary">
+                  <div className="flex items-center gap-1.5 text-[11px] font-matter">
                     <Clock className="w-3.5 h-3.5" />
                     <span>{formatLastEdited(project.updatedAt)}</span>
                   </div>
@@ -548,7 +577,7 @@ export function ProjectsPage() {
                         e.stopPropagation()
                         setProjectToDelete(project)
                       }}
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full w-7 h-7 p-0"
+                      className="text-tx-tertiary hover:text-destructive hover:bg-destructive/10 rounded-full w-7 h-7 p-0 cursor-pointer"
                       title="Delete project"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -557,7 +586,7 @@ export function ProjectsPage() {
                     <Button
                       size="xs"
                       onClick={() => navigate(`/project/${project.id}`)}
-                      className="gap-1 font-semibold rounded-full px-3 text-xs h-7 bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 shadow-2xs"
+                      className="btn-sarvam-dark gap-1 font-semibold px-3 text-xs h-7 shadow-xs cursor-pointer"
                     >
                       <span>Open</span>
                       <ArrowRight className="w-3 h-3" />

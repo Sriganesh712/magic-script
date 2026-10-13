@@ -683,17 +683,17 @@ export function EditorPage() {
             <Separator orientation="vertical" className="h-4 mx-1" />
 
             {/* Export buttons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 font-matter">
               <Button
                 variant="outline"
                 size="xs"
                 onClick={() => handleExport('PDF')}
                 disabled={exportingFormat !== null}
-                className="text-[11px] h-7 px-3 rounded-full border-black/[0.08] dark:border-white/[0.1]"
+                className="btn-sarvam-light text-[11px] h-7 px-3 cursor-pointer"
                 title="Export script to Industry Standard PDF"
               >
                 {exportingFormat === 'PDF' ? (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-blue-500" />
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-sr-indigo-600" />
                 ) : (
                   <FileDown className="w-3 h-3 mr-1" />
                 )}
@@ -704,11 +704,11 @@ export function EditorPage() {
                 size="xs"
                 onClick={() => handleExport('Fountain')}
                 disabled={exportingFormat !== null}
-                className="text-[11px] h-7 px-3 rounded-full border-black/[0.08] dark:border-white/[0.1] hidden sm:inline-flex"
+                className="btn-sarvam-light text-[11px] h-7 px-3 hidden sm:inline-flex cursor-pointer"
                 title="Export plain-text Fountain format"
               >
                 {exportingFormat === 'Fountain' && (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-blue-500" />
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-sr-indigo-600" />
                 )}
                 Fountain
               </Button>
@@ -717,11 +717,11 @@ export function EditorPage() {
                 size="xs"
                 onClick={() => handleExport('FDX')}
                 disabled={exportingFormat !== null}
-                className="text-[11px] h-7 px-3 rounded-full border-black/[0.08] dark:border-white/[0.1] hidden sm:inline-flex"
+                className="btn-sarvam-light text-[11px] h-7 px-3 hidden sm:inline-flex cursor-pointer"
                 title="Export to Final Draft (FDX)"
               >
                 {exportingFormat === 'FDX' && (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-blue-500" />
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin text-sr-indigo-600" />
                 )}
                 FDX
               </Button>
@@ -734,7 +734,7 @@ export function EditorPage() {
               size="xs"
               onClick={manualSave}
               disabled={isSaving}
-              className="gap-1 text-xs font-semibold rounded-full px-3.5 h-7 bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 shadow-2xs"
+              className="btn-sarvam-dark gap-1 text-xs font-semibold px-3.5 h-7 shadow-xs cursor-pointer"
               title="Save changes (⌘S)"
             >
               <Save className="w-3.5 h-3.5" />
@@ -746,7 +746,7 @@ export function EditorPage() {
               variant="ghost"
               size="xs"
               onClick={handleExportBackup}
-              className="text-muted-foreground hover:text-foreground hidden lg:flex rounded-full w-7 h-7 p-0"
+              className="text-tx-tertiary hover:text-tx hidden lg:flex rounded-full w-7 h-7 p-0 cursor-pointer"
               title="Export JSON Backup"
             >
               <Download className="w-3.5 h-3.5" />
@@ -762,7 +762,7 @@ export function EditorPage() {
               variant="ghost"
               size="xs"
               onClick={() => document.getElementById('editor-import-backup')?.click()}
-              className="text-muted-foreground hover:text-foreground hidden lg:flex rounded-full w-7 h-7 p-0"
+              className="text-tx-tertiary hover:text-tx hidden lg:flex rounded-full w-7 h-7 p-0 cursor-pointer"
               title="Import JSON Backup"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -771,55 +771,55 @@ export function EditorPage() {
         </div>
 
         {/* Screenplay Element Formatting Quickbar */}
-        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/[0.04] dark:border-white/[0.05] overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-1 shrink-0">
+        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-st-secondary overflow-x-auto pb-1 scrollbar-none font-matter">
+          <span className="text-[10px] font-bold text-tx-tertiary uppercase tracking-widest mr-1 shrink-0">
             Insert:
           </span>
           <button
             onClick={toolbarActions.scene}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Scene Heading (⌘⌥1)"
           >
             Scene
           </button>
           <button
             onClick={toolbarActions.action}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Action (⌘⌥2)"
           >
             Action
           </button>
           <button
             onClick={toolbarActions.character}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Character (⌘⌥3)"
           >
             Character
           </button>
           <button
             onClick={toolbarActions.dialogue}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Dialogue (⌘⌥4)"
           >
             Dialogue
           </button>
           <button
             onClick={toolbarActions.parenthetical}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Parenthetical (Tab)"
           >
             Parenthetical
           </button>
           <button
             onClick={toolbarActions.transition}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Transition (⌘⌥5)"
           >
             Transition
           </button>
           <button
             onClick={toolbarActions.pageBreak}
-            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-sf-secondary hover:bg-white dark:hover:bg-neutral-700 text-tx border border-st-secondary transition-all duration-200 active:scale-[0.96] shrink-0 cursor-pointer"
             title="Forced Page Break"
           >
             Page Break

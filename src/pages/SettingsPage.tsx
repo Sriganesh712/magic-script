@@ -303,20 +303,38 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full space-y-7 font-sans">
+    <div className="relative p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full space-y-8 font-matter overflow-hidden">
+      {/* Sarvam Signature Radiant Hero Glow */}
+      <div
+        className="absolute -top-20 left-1/2 -translate-x-1/2 -z-10 w-[95%] max-w-5xl h-80 pointer-events-none opacity-35 dark:opacity-15 blur-[90px] rounded-full"
+        style={{
+          background: 'radial-gradient(ellipse, #FF8A34 0%, #FFA24C 25%, #C7D2FE 55%, transparent 75%)',
+        }}
+        aria-hidden="true"
+      />
+
+      {/* Decorative hairline motif */}
+      <div className="flex flex-col items-center gap-2 max-w-md mx-auto pt-1">
+        <div className="w-full h-px" style={{ background: 'radial-gradient(circle, #6a88e2 0%, transparent 100%)' }} />
+        <p className="px-6 font-matter text-sr-indigo-900 dark:text-sr-indigo-300 text-xs sm:text-sm font-semibold tracking-wider uppercase">
+          Studio Preferences & Configurations
+        </p>
+        <div className="w-full h-px" style={{ background: 'radial-gradient(circle, #6a88e2 0%, transparent 100%)' }} />
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="font-season-mix text-2xl sm:text-4xl font-medium text-tx tracking-tight">
             Settings
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-tx-secondary mt-1 font-matter">
             Configure formatting defaults, autosave preferences, backups, and cloud integrations.
           </p>
         </div>
 
         {isSavedNotice && (
-          <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 gap-1.5 py-1 px-2.5">
+          <Badge className="bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20 gap-1.5 py-1 px-2.5 rounded-full font-matter">
             <Check className="w-3.5 h-3.5" />
             <span>Preferences Saved</span>
           </Badge>
@@ -325,13 +343,13 @@ export function SettingsPage() {
 
       <div className="space-y-6">
         {/* 1. Page Format & Script Standards */}
-        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
-          <CardHeader>
-            <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <FileText className="w-4 h-4 text-primary" />
+        <Card className="rounded-2xl border border-st bg-white/95 dark:bg-[#141728]/95 backdrop-blur-xl shadow-xs overflow-hidden transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)] font-matter">
+          <CardHeader className="border-b border-st-secondary pb-3">
+            <CardTitle className="font-season-mix text-lg font-medium text-tx flex items-center gap-2">
+              <FileText className="w-4 h-4 text-sr-indigo-600 dark:text-sr-indigo-400" />
               <span>Screenplay Format & Pagination</span>
             </CardTitle>
-            <CardDescription className="text-xs">
+            <CardDescription className="text-xs text-tx-tertiary font-matter">
               Industry standard screenplay margins, typography, and page sizes.
             </CardDescription>
           </CardHeader>

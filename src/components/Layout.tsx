@@ -166,17 +166,17 @@ export function Layout({ children }: LayoutProps) {
                     to={item.path}
                     title={isCollapsed ? item.label : undefined}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all relative',
+                      'flex items-center gap-3 px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-350 ease-[cubic-bezier(0.2,0,0,1)] active:scale-[0.97]',
                       isActive
-                        ? 'bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold shadow-xs'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-neutral-100/80 dark:hover:bg-neutral-800/60',
+                        ? 'bg-[#1e2033] text-white dark:bg-white dark:text-[#1e2033] font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.4),inset_0_-2px_0_rgba(0,0,0,0.2)]'
+                        : 'text-tx-secondary hover:text-tx hover:bg-sf-secondary',
                       isCollapsed && 'justify-center px-2'
                     )}
                   >
                     <Icon className="w-4 h-4 shrink-0" />
                     {!isCollapsed && <span className="truncate">{item.label}</span>}
                     {item.badge && !isCollapsed && (
-                      <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/20 text-primary">
+                      <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-sr-indigo-50 dark:bg-sr-indigo-900/40 text-sr-indigo-700 dark:text-sr-indigo-300 font-semibold border border-st-secondary">
                         {item.badge}
                       </span>
                     )}
@@ -188,12 +188,12 @@ export function Layout({ children }: LayoutProps) {
         </div>
 
         {/* Bottom Sidebar Action & Profile Dock */}
-        <div className="p-3 border-t border-black/[0.05] dark:border-white/[0.06] space-y-2.5 bg-card">
-          {/* Quick Action Pill Button (like image.png "Take payment") */}
+        <div className="p-3 border-t border-st-secondary space-y-2.5 bg-card">
+          {/* Quick Action Pill Button (Sarvam style) */}
           {!isCollapsed ? (
             <Button
               onClick={() => navigate('/')}
-              className="w-full rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 font-medium text-xs h-9 gap-1.5 shadow-xs"
+              className="btn-sarvam-dark w-full text-xs h-9 gap-1.5 shadow-xs cursor-pointer"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Start Writing</span>
@@ -202,7 +202,7 @@ export function Layout({ children }: LayoutProps) {
             <Button
               onClick={() => navigate('/')}
               size="icon-sm"
-              className="w-full rounded-xl bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+              className="btn-sarvam-dark w-full rounded-full"
               title="Start Writing"
             >
               <Plus className="w-4 h-4" />
@@ -328,6 +328,18 @@ export function Layout({ children }: LayoutProps) {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 pb-16 md:pb-0 overflow-y-auto">
+        {/* Sarvam Signature Announcement / Status Ticker Bar */}
+        <div className="relative flex shrink-0 justify-center items-center border-b border-st-secondary h-9 px-4 overflow-hidden bg-gradient-to-r from-white via-indigo-50/40 to-white dark:from-[#0e101a] dark:via-[#161a2e] dark:to-[#0e101a]">
+          <div className="flex items-center gap-3 text-xs font-matter">
+            <span className="px-2 py-0.5 border rounded-full font-semibold text-[11px] leading-none bg-white dark:bg-[#1a1e33] border-st-secondary text-sr-indigo-900 dark:text-sr-indigo-300 shadow-2xs">
+              Live
+            </span>
+            <span className="text-tx-secondary text-[12px] font-medium tracking-wide truncate">
+              Screenplay Studio v2.0 • Offline-first studio with real-time Google Drive & Supabase sync
+            </span>
+          </div>
+        </div>
+
         {children || <Outlet />}
       </main>
 

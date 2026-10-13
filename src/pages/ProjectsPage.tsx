@@ -410,46 +410,46 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-7 font-sans">
       {/* Top Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
             Projects
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">
             Manage your screenplay library, outlines, and scripts.
           </p>
         </div>
 
         <Button
           onClick={() => setIsCreateOpen(true)}
-          className="gap-2 shadow-xs cursor-pointer font-medium self-start sm:self-auto"
+          className="rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 px-4 h-9 gap-2 shadow-xs cursor-pointer font-medium self-start sm:self-auto text-xs"
         >
           <Plus className="w-4 h-4" />
-          <span>New Project</span>
+          <span>New Screenplay</span>
         </Button>
       </div>
 
-      {/* Search & Filter Bar */}
+      {/* Search & Filter Bar (Apple Pill Style) */}
       <div className="flex flex-col sm:flex-row items-center gap-3">
         <div className="relative flex-1 w-full">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search projects by title, genre, logline..."
-            className="pl-9 w-full bg-card"
+            className="pl-10 w-full bg-card rounded-full border-black/[0.08] dark:border-white/[0.1] text-xs h-9"
           />
         </div>
 
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <Filter className="w-4 h-4 text-muted-foreground shrink-0 hidden sm:block" />
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[160px] bg-card">
+            <SelectTrigger className="w-full sm:w-[160px] bg-card rounded-full border-black/[0.08] dark:border-white/[0.1] text-xs h-9">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl">
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="concept">Concept</SelectItem>
               <SelectItem value="outline">Outline</SelectItem>
@@ -466,10 +466,10 @@ export function ProjectsPage() {
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse bg-muted/30 border-border">
+            <Card key={i} className="animate-pulse bg-muted/30 border-black/[0.05] dark:border-white/[0.06] rounded-2xl">
               <CardHeader className="space-y-2">
-                <div className="h-5 bg-muted rounded w-2/3" />
-                <div className="h-4 bg-muted rounded w-1/3" />
+                <div className="h-5 bg-muted rounded-xl w-2/3" />
+                <div className="h-4 bg-muted rounded-xl w-1/3" />
               </CardHeader>
               <CardContent className="h-20 bg-muted/20" />
               <CardFooter className="h-10 bg-muted/40" />
@@ -484,14 +484,14 @@ export function ProjectsPage() {
             return (
               <Card
                 key={project.id}
-                className="group relative flex flex-col justify-between border-border/70 hover:border-border transition-all hover:shadow-md hover:-translate-y-0.5 bg-card"
+                className="group relative flex flex-col justify-between rounded-2xl border border-black/[0.06] dark:border-white/[0.08] hover:border-black/[0.15] dark:hover:border-white/[0.2] transition-all hover:shadow-md hover:-translate-y-0.5 bg-card overflow-hidden"
               >
                 <div>
-                  <CardHeader className="pb-3">
+                  <CardHeader className="pb-3 border-b border-black/[0.04] dark:border-white/[0.05]">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0 flex-1">
                         <CardTitle
-                          className="text-lg font-bold text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                          className="text-base font-bold text-foreground truncate cursor-pointer hover:text-primary transition-colors"
                           onClick={() => navigate(`/project/${project.id}`)}
                         >
                           {project.name}
@@ -505,19 +505,19 @@ export function ProjectsPage() {
 
                       <Badge
                         variant={statusConfig.variant}
-                        className={cn('shrink-0 border font-medium', statusConfig.badgeClass)}
+                        className={cn('shrink-0 border font-semibold rounded-full text-[10px] px-2.5 py-0.5', statusConfig.badgeClass)}
                       >
                         {statusConfig.label}
                       </Badge>
                     </div>
                   </CardHeader>
 
-                  <CardContent className="py-2 space-y-3">
+                  <CardContent className="py-3.5 space-y-3">
                     <p className="text-xs text-muted-foreground line-clamp-2 min-h-[2rem]">
                       {project.logline || 'No logline added yet. Click to open and begin writing.'}
                     </p>
 
-                    <div className="grid grid-cols-2 gap-2 py-2 px-2.5 rounded-lg bg-muted/40 text-xs">
+                    <div className="grid grid-cols-2 gap-2 py-2 px-3 rounded-xl bg-neutral-50/70 dark:bg-neutral-800/40 border border-black/[0.04] dark:border-white/[0.05] text-xs">
                       <div className="flex items-center gap-1.5 text-muted-foreground">
                         <FileText className="w-3.5 h-3.5 text-primary" />
                         <span>
@@ -534,13 +534,13 @@ export function ProjectsPage() {
                   </CardContent>
                 </div>
 
-                <CardFooter className="pt-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center gap-1">
+                <CardFooter className="pt-3 border-t border-black/[0.04] dark:border-white/[0.05] flex items-center justify-between text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1.5 text-[11px]">
                     <Clock className="w-3.5 h-3.5" />
                     <span>{formatLastEdited(project.updatedAt)}</span>
                   </div>
 
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <Button
                       variant="ghost"
                       size="xs"
@@ -548,7 +548,7 @@ export function ProjectsPage() {
                         e.stopPropagation()
                         setProjectToDelete(project)
                       }}
-                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full w-7 h-7 p-0"
                       title="Delete project"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -556,9 +556,8 @@ export function ProjectsPage() {
 
                     <Button
                       size="xs"
-                      variant="default"
                       onClick={() => navigate(`/project/${project.id}`)}
-                      className="gap-1 font-medium"
+                      className="gap-1 font-semibold rounded-full px-3 text-xs h-7 bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 shadow-2xs"
                     >
                       <span>Open</span>
                       <ArrowRight className="w-3 h-3" />

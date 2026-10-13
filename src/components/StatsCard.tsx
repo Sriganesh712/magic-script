@@ -21,8 +21,9 @@ export interface StatsCardProps {
 }
 
 /**
- * Reusable Stat Card Component
- * Displays a single metric with icon, value, label, and optional trend indicator
+ * Reusable Stat Card Component (Apple & Square Design Inspired)
+ * Displays a single metric with circular icon badge, bold display value,
+ * and elegant status/trend pill.
  */
 export function StatsCard({
   label,
@@ -47,59 +48,55 @@ export function StatsCard({
   const TrendIcon = trend ? getTrendIcon(trend.direction) : null
 
   return (
-    <Card className={cn('relative overflow-hidden transition-all hover:shadow-md border border-border/80', className)}>
-      <CardContent className="p-4 sm:p-5">
+    <Card
+      className={cn(
+        'relative overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card',
+        className
+      )}
+    >
+      <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <p className="text-xs sm:text-sm font-medium text-muted-foreground truncate">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider truncate">
               {label}
             </p>
-            <div className="mt-1 flex items-baseline gap-2">
-              <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
+            <div className="mt-1.5 flex items-baseline gap-2">
+              <span className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground font-sans">
                 {typeof value === 'number' ? value.toLocaleString() : value}
               </span>
             </div>
 
             {trend && (
-              <div className="mt-2 flex items-center gap-1 text-xs">
-                {TrendIcon && (
-                  <TrendIcon
-                    className={cn(
-                      'w-3.5 h-3.5',
-                      trend.isPositive === true
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : trend.isPositive === false
-                        ? 'text-rose-600 dark:text-rose-400'
-                        : 'text-muted-foreground'
-                    )}
-                  />
-                )}
+              <div className="mt-2.5 flex items-center gap-1.5 text-xs">
                 <span
                   className={cn(
-                    'font-medium',
+                    'inline-flex items-center gap-1 font-semibold px-2 py-0.5 rounded-full text-[11px]',
                     trend.isPositive === true
-                      ? 'text-emerald-600 dark:text-emerald-400'
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                       : trend.isPositive === false
-                      ? 'text-rose-600 dark:text-rose-400'
-                      : 'text-muted-foreground'
+                      ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
+                      : 'bg-muted text-muted-foreground border border-border'
                   )}
                 >
-                  {typeof trend.value === 'number' && trend.value > 0 ? `+${trend.value}` : trend.value}
+                  {TrendIcon && <TrendIcon className="w-3 h-3 shrink-0" />}
+                  <span>
+                    {typeof trend.value === 'number' && trend.value > 0 ? `+${trend.value}` : trend.value}
+                  </span>
                 </span>
                 {trend.label && (
-                  <span className="text-muted-foreground ml-0.5 truncate">{trend.label}</span>
+                  <span className="text-muted-foreground text-[11px] truncate">{trend.label}</span>
                 )}
               </div>
             )}
 
             {description && !trend && (
-              <p className="mt-1.5 text-xs text-muted-foreground line-clamp-1">{description}</p>
+              <p className="mt-2 text-xs text-muted-foreground line-clamp-1">{description}</p>
             )}
           </div>
 
           <div
             className={cn(
-              'flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-lg',
+              'flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full transition-transform duration-200 group-hover:scale-105 shadow-2xs',
               iconColor
             )}
             aria-hidden="true"

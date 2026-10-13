@@ -154,7 +154,7 @@ export function CalendarHeatmap({
   }
 
   return (
-    <div className={cn('relative rounded-xl border border-border/70 bg-card p-4 sm:p-5 text-card-foreground', className)}>
+    <div className={cn('relative rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card p-5 text-card-foreground shadow-xs', className)}>
       {title && (
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-sm sm:text-base font-semibold text-foreground">{title}</h3>

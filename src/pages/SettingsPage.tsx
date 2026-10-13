@@ -303,7 +303,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full space-y-6">
+    <div className="p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto w-full space-y-7 font-sans">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -325,7 +325,7 @@ export function SettingsPage() {
 
       <div className="space-y-6">
         {/* 1. Page Format & Script Standards */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <FileText className="w-4 h-4 text-primary" />
@@ -493,7 +493,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 2. Autosave & Local Persistence */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Clock className="w-4 h-4 text-primary" />
@@ -535,7 +535,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 3. Appearance */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Sun className="w-4 h-4 text-primary" />
@@ -582,7 +582,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 4. Cloud Account & Supabase Sync (SYNC-001, SYNC-004, SYNC-007) */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -735,7 +735,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 5. Google Drive Integration (DRV-001, DRV-005) */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -840,7 +840,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 6. Groq AI Script Doctor (AI-006, AI-007) */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -902,7 +902,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 7. Data & Storage Backups */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <HardDrive className="w-4 h-4 text-primary" />
@@ -962,7 +962,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 8. About Screenplay Studio */}
-        <Card className="border-border/80 bg-card">
+        <Card className="rounded-2xl border border-black/[0.06] dark:border-white/[0.08] bg-card shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold flex items-center gap-2">
               <Info className="w-4 h-4 text-primary" />
@@ -994,7 +994,7 @@ export function SettingsPage() {
         </Card>
 
         {/* 9. Danger Zone */}
-        <Card className="border-destructive/40 bg-destructive/5">
+        <Card className="rounded-2xl border border-destructive/20 bg-destructive/5 shadow-xs overflow-hidden">
           <CardHeader>
             <CardTitle className="text-base font-semibold text-destructive flex items-center gap-2">
               <ShieldAlert className="w-4 h-4" />

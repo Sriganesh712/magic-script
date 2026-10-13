@@ -629,10 +629,10 @@ export function EditorPage() {
 
               {/* Status Selector */}
               <Select value={project.status} onValueChange={(val: any) => handleStatusChange(val)}>
-                <SelectTrigger className="h-6 text-[11px] px-2 font-medium bg-muted/60 border-border">
+                <SelectTrigger className="h-6 text-[11px] px-2.5 font-medium bg-muted/60 border-black/[0.08] dark:border-white/[0.1] rounded-full">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="rounded-xl">
                   <SelectItem value="concept">Concept</SelectItem>
                   <SelectItem value="outline">Outline</SelectItem>
                   <SelectItem value="drafting">Drafting</SelectItem>
@@ -643,7 +643,7 @@ export function EditorPage() {
               </Select>
 
               {draft && (
-                <span className="text-[11px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted font-medium hidden md:inline">
+                <span className="text-[11px] text-muted-foreground px-2 py-0.5 rounded-full bg-muted font-medium hidden md:inline">
                   {draft.name}
                 </span>
               )}
@@ -653,13 +653,13 @@ export function EditorPage() {
 
             {/* Word Count & Save Indicator */}
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className="font-medium text-foreground">{wordCount.toLocaleString()}</span>
+              <span className="font-semibold text-foreground">{wordCount.toLocaleString()}</span>
               <span>words</span>
               <Separator orientation="vertical" className="h-3" />
               <div className="flex items-center gap-1">
                 {isSaving && <Save className="w-3.5 h-3.5 text-blue-500 animate-spin" />}
                 {!isSaving && lastSaved && <Database className="w-3.5 h-3.5 text-emerald-500" />}
-                <span className="text-[11px]">
+                <span className="text-[11px] font-medium">
                   {isSaving ? 'Saving...' : lastSaved ? `Saved` : 'Draft'}
                 </span>
               </div>
@@ -673,7 +673,7 @@ export function EditorPage() {
               variant={showSidebar ? 'secondary' : 'ghost'}
               size="xs"
               onClick={() => setShowSidebar(!showSidebar)}
-              className="gap-1 text-xs"
+              className="gap-1 text-xs rounded-full h-7 px-3"
               title="Toggle Production Tools Sidebar"
             >
               <LayoutList className="w-3.5 h-3.5" />
@@ -689,7 +689,7 @@ export function EditorPage() {
                 size="xs"
                 onClick={() => handleExport('PDF')}
                 disabled={exportingFormat !== null}
-                className="text-[11px] h-7 px-2"
+                className="text-[11px] h-7 px-3 rounded-full border-black/[0.08] dark:border-white/[0.1]"
                 title="Export script to Industry Standard PDF"
               >
                 {exportingFormat === 'PDF' ? (
@@ -704,7 +704,7 @@ export function EditorPage() {
                 size="xs"
                 onClick={() => handleExport('Fountain')}
                 disabled={exportingFormat !== null}
-                className="text-[11px] h-7 px-2 hidden sm:inline-flex"
+                className="text-[11px] h-7 px-3 rounded-full border-black/[0.08] dark:border-white/[0.1] hidden sm:inline-flex"
                 title="Export plain-text Fountain format"
               >
                 {exportingFormat === 'Fountain' && (
@@ -717,7 +717,7 @@ export function EditorPage() {
                 size="xs"
                 onClick={() => handleExport('FDX')}
                 disabled={exportingFormat !== null}
-                className="text-[11px] h-7 px-2 hidden sm:inline-flex"
+                className="text-[11px] h-7 px-3 rounded-full border-black/[0.08] dark:border-white/[0.1] hidden sm:inline-flex"
                 title="Export to Final Draft (FDX)"
               >
                 {exportingFormat === 'FDX' && (
@@ -731,11 +731,10 @@ export function EditorPage() {
 
             {/* Manual Save Button */}
             <Button
-              variant="default"
               size="xs"
               onClick={manualSave}
               disabled={isSaving}
-              className="gap-1 text-xs font-semibold shadow-xs"
+              className="gap-1 text-xs font-semibold rounded-full px-3.5 h-7 bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 shadow-2xs"
               title="Save changes (⌘S)"
             >
               <Save className="w-3.5 h-3.5" />
@@ -747,7 +746,7 @@ export function EditorPage() {
               variant="ghost"
               size="xs"
               onClick={handleExportBackup}
-              className="text-muted-foreground hover:text-foreground hidden lg:flex"
+              className="text-muted-foreground hover:text-foreground hidden lg:flex rounded-full w-7 h-7 p-0"
               title="Export JSON Backup"
             >
               <Download className="w-3.5 h-3.5" />
@@ -763,7 +762,7 @@ export function EditorPage() {
               variant="ghost"
               size="xs"
               onClick={() => document.getElementById('editor-import-backup')?.click()}
-              className="text-muted-foreground hover:text-foreground hidden lg:flex"
+              className="text-muted-foreground hover:text-foreground hidden lg:flex rounded-full w-7 h-7 p-0"
               title="Import JSON Backup"
             >
               <Upload className="w-3.5 h-3.5" />
@@ -772,55 +771,55 @@ export function EditorPage() {
         </div>
 
         {/* Screenplay Element Formatting Quickbar */}
-        <div className="flex items-center gap-1 mt-2 pt-2 border-t border-border/50 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mr-1 shrink-0">
+        <div className="flex items-center gap-1.5 mt-2 pt-2 border-t border-black/[0.04] dark:border-white/[0.05] overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mr-1 shrink-0">
             Insert:
           </span>
           <button
             onClick={toolbarActions.scene}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Scene Heading (⌘⌥1)"
           >
             Scene
           </button>
           <button
             onClick={toolbarActions.action}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Action (⌘⌥2)"
           >
             Action
           </button>
           <button
             onClick={toolbarActions.character}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Character (⌘⌥3)"
           >
             Character
           </button>
           <button
             onClick={toolbarActions.dialogue}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Dialogue (⌘⌥4)"
           >
             Dialogue
           </button>
           <button
             onClick={toolbarActions.parenthetical}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Parenthetical (Tab)"
           >
             Parenthetical
           </button>
           <button
             onClick={toolbarActions.transition}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Transition (⌘⌥5)"
           >
             Transition
           </button>
           <button
             onClick={toolbarActions.pageBreak}
-            className="px-2.5 py-1 text-xs font-medium rounded-md bg-muted hover:bg-muted/80 text-foreground transition-colors shrink-0"
+            className="px-3 py-1 text-xs font-medium rounded-full bg-neutral-100 hover:bg-neutral-200/80 dark:bg-neutral-800 dark:hover:bg-neutral-700 text-foreground transition-colors shrink-0"
             title="Forced Page Break"
           >
             Page Break

@@ -49,6 +49,7 @@ import {
   RefreshCw,
   ExternalLink,
   FileText,
+  Trash2,
 } from 'lucide-react'
 
 export function DashboardPage() {
@@ -88,16 +89,59 @@ export function DashboardPage() {
       setProjects(projs)
       setPendingSyncCount(pendingOps.length)
 
-      // If writingSessions is empty but user has existing screenplays,
-      // extract actual screenplay word counts to seed realistic real data
-      let finalSessions = sessList
-      let finalStats = statsList
+      // Automatically purge leftover demo seeds (400, 660, 490 words) or orphaned sessions
+      const validProjectIds = new Set(projs.map((p) => p.id))
+      const isDemoSession = (s: WritingSession) =>
+        !validProjectIds.has(s.projectId) ||
+        (s.wordsAdded === 450 && s.netWords === 400) ||
+        (s.wordsAdded === 780 && s.netWords === 660) ||
+        (s.wordsAdded === 520 && s.netWords === 490)
 
-      if (sessList.length === 0 && scrs.length > 0) {
+      const demoSessionIds = sessList.filter(isDemoSession).map((s) => s.id)
+      if (demoSessionIds.length > 0) {
+        try {
+          await db.writingSessions.bulkDelete(demoSessionIds)
+        } catch {
+          // Ignore
+        }
+      }
+
+      const isDemoGoal = (g: WritingGoal) =>
+        !validProjectIds.has(g.projectId) ||
+        (g.type === 'daily' && g.targetWords === 500 && g.projectId.startsWith('proj_') && !validProjectIds.has(g.projectId)) ||
+        (g.type === 'weekly' && g.targetWords === 3500 && !validProjectIds.has(g.projectId)) ||
+        (g.type === 'project' && g.targetWords === 25000 && !validProjectIds.has(g.projectId))
+
+      const demoGoalIds = goalsList.filter(isDemoGoal).map((g) => g.id)
+      if (demoGoalIds.length > 0) {
+        try {
+          await db.writingGoals.bulkDelete(demoGoalIds)
+        } catch {
+          // Ignore
+        }
+      }
+
+      const demoStats = statsList.filter((s) => !validProjectIds.has(s.projectId))
+      if (demoStats.length > 0) {
+        try {
+          await db.dailyStats.bulkDelete(demoStats.map((s) => s.id!).filter(Boolean))
+        } catch {
+          // Ignore
+        }
+      }
+
+      let realSessions = sessList.filter((s) => !isDemoSession(s))
+      let realStats = statsList.filter((s) => validProjectIds.has(s.projectId))
+      const realGoals = goalsList.filter((g) => !isDemoGoal(g))
+
+      // If user has existing real screenplays with words, synthesize initial real stats from them
+      const wasReset = localStorage.getItem('screenplay_studio_analytics_cleared') === 'true'
+      if (realSessions.length === 0 && scrs.length > 0 && !wasReset) {
         const synthesizedSessions: WritingSession[] = []
         const synthesizedStats: DailyStats[] = []
 
         for (const scr of scrs) {
+          if (!validProjectIds.has(scr.projectId)) continue
           const rawText = (typeof scr.elements === 'string' ? scr.elements : JSON.stringify(scr.elements || ''))
             .replace(/<[^>]*>/g, ' ')
           const words = rawText.trim().split(/\s+/).filter((w) => w.length > 0).length
@@ -141,14 +185,14 @@ export function DashboardPage() {
           } catch {
             // Ignore potential primary key collision
           }
-          finalSessions = await db.writingSessions.orderBy('startTime').reverse().limit(100).toArray()
-          finalStats = await db.dailyStats.toArray()
+          realSessions = await db.writingSessions.orderBy('startTime').reverse().limit(100).toArray()
+          realStats = await db.dailyStats.toArray()
         }
       }
 
-      setSessions(finalSessions)
-      setDailyStats(finalStats)
-      setGoals(goalsList)
+      setSessions(realSessions)
+      setDailyStats(realStats)
+      setGoals(realGoals)
 
       // Refresh Google Drive auth and real-time cloud files
       const currentDriveAuth = getDriveAuthState()
@@ -254,6 +298,25 @@ export function DashboardPage() {
       console.error('[DashboardPage] Manual sync error:', err)
     } finally {
       setIsSyncingCloud(false)
+    }
+  }
+
+  // Clear writing sessions & daily stats to start completely fresh from 0
+  const handleResetAnalytics = async () => {
+    if (
+      confirm(
+        'Clear all writing session logs and reset word counts to 0? Your screenplays, drafts, and Google Drive cloud backups will NOT be deleted.'
+      )
+    ) {
+      try {
+        localStorage.setItem('screenplay_studio_analytics_cleared', 'true')
+        await db.writingSessions.clear()
+        await db.dailyStats.clear()
+        await db.writingGoals.clear()
+        await loadAnalyticsData(true)
+      } catch (err) {
+        console.error('[DashboardPage] Failed to clear analytics:', err)
+      }
     }
   }
 
@@ -543,6 +606,17 @@ export function DashboardPage() {
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span className="hidden sm:inline">Refresh</span>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleResetAnalytics}
+            className="gap-1.5 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+            title="Clear demo writing history and reset to 0"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Reset Stats</span>
           </Button>
         </div>
       </div>

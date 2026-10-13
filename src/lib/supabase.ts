@@ -34,30 +34,6 @@ export function getSupabaseClient(): SupabaseClient | null {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
-        storage: {
-          getItem: (key: string) => {
-            // Use sessionStorage for better security
-            try {
-              return sessionStorage.getItem(key)
-            } catch {
-              return null
-            }
-          },
-          setItem: (key: string, value: string) => {
-            try {
-              sessionStorage.setItem(key, value)
-            } catch {
-              // Ignore storage errors
-            }
-          },
-          removeItem: (key: string) => {
-            try {
-              sessionStorage.removeItem(key)
-            } catch {
-              // Ignore storage errors
-            }
-          },
-        },
       },
       global: {
         headers: {
@@ -74,6 +50,12 @@ export function getSupabaseClient(): SupabaseClient | null {
 // Auth Helpers
 // ============================================================================
 
+export async function exchangeCodeForSession(code: string) {
+  const client = getSupabaseClient()
+  if (!client) return { data: { session: null, user: null }, error: new Error('Supabase not configured') }
+  return await client.auth.exchangeCodeForSession(code)
+}
+
 export async function getCurrentUser(): Promise<User | null> {
   const client = getSupabaseClient()
   if (!client) return null
@@ -84,7 +66,9 @@ export async function getCurrentUser(): Promise<User | null> {
   } = await client.auth.getUser()
 
   if (error) {
-    console.error('[Supabase] Error getting user:', error)
+    if (error.name !== 'AuthSessionMissingError') {
+      console.warn('[Supabase] Auth state:', error.message)
+    }
     return null
   }
 
@@ -101,7 +85,9 @@ export async function getSession() {
   } = await client.auth.getSession()
 
   if (error) {
-    console.error('[Supabase] Error getting session:', error)
+    if (error.name !== 'AuthSessionMissingError') {
+      console.warn('[Supabase] Session state:', error.message)
+    }
     return null
   }
 

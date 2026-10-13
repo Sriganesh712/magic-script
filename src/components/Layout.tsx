@@ -15,8 +15,10 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Clapperboard,
-  User,
+  User as UserIcon,
+  CheckCircle,
 } from 'lucide-react'
+import { getCurrentUser, onAuthStateChange, type User as SupabaseUser } from '@/lib/supabase'
 import { cn } from 'cn'
 
 export interface LayoutProps {
@@ -42,10 +44,18 @@ export function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const [mounted, setMounted] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [currentUser, setCurrentUser] = useState<SupabaseUser | null>(null)
 
-  // Prevent hydration mismatch for next-themes
+  // Fetch initial user and subscribe to auth changes
   useEffect(() => {
     setMounted(true)
+    getCurrentUser().then(setCurrentUser).catch(() => {})
+    const sub = onAuthStateChange((user) => {
+      setCurrentUser(user)
+    })
+    return () => {
+      sub?.data?.subscription?.unsubscribe?.()
+    }
   }, [])
 
   const toggleTheme = () => {
@@ -191,27 +201,48 @@ export function Layout({ children }: LayoutProps) {
             )}
           </Button>
 
-          {/* User Placeholder Profile */}
-          <div
+          {/* User Profile Card (Dynamic with Supabase Auth) */}
+          <NavLink
+            to="/settings"
+            title={currentUser ? `Signed in as ${currentUser.email}. Click for Settings.` : 'Local Workspace. Click to sign in.'}
             className={cn(
-              'flex items-center gap-2.5 p-1.5 rounded-lg border border-border/60 bg-card',
+              'flex items-center gap-2.5 p-1.5 rounded-lg border border-border/60 bg-card hover:bg-muted/50 transition-colors cursor-pointer group',
               isCollapsed && 'justify-center p-1'
             )}
           >
-            <div className="w-7 h-7 rounded-full bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center font-semibold text-xs shrink-0">
-              <User className="w-3.5 h-3.5" />
-            </div>
+            {currentUser?.user_metadata?.avatar_url || currentUser?.user_metadata?.picture ? (
+              <img
+                src={currentUser.user_metadata.avatar_url || currentUser.user_metadata.picture}
+                alt="Avatar"
+                className="w-7 h-7 rounded-full object-cover shrink-0 border border-primary/20"
+              />
+            ) : (
+              <div className="w-7 h-7 rounded-full bg-primary/10 dark:bg-primary/20 text-primary flex items-center justify-center font-semibold text-xs shrink-0">
+                {currentUser ? (
+                  <span>{(currentUser.email?.[0] || 'U').toUpperCase()}</span>
+                ) : (
+                  <UserIcon className="w-3.5 h-3.5" />
+                )}
+              </div>
+            )}
             {!isCollapsed && (
-              <div className="flex flex-col min-w-0">
-                <span className="text-xs font-medium text-foreground truncate">
-                  Guest Writer
-                </span>
+              <div className="flex flex-col min-w-0 flex-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-medium text-foreground truncate">
+                    {currentUser
+                      ? currentUser.user_metadata?.full_name || currentUser.email?.split('@')[0]
+                      : 'Guest Writer'}
+                  </span>
+                  {currentUser && (
+                    <CheckCircle className="w-3 h-3 text-emerald-500 shrink-0" />
+                  )}
+                </div>
                 <span className="text-[10px] text-muted-foreground truncate">
-                  Local Workspace
+                  {currentUser ? currentUser.email : 'Local Workspace (Click to sync)'}
                 </span>
               </div>
             )}
-          </div>
+          </NavLink>
         </div>
       </aside>
 

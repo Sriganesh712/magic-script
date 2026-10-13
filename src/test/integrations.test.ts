@@ -8,7 +8,10 @@ import {
   getDriveAuthState,
   saveDriveAuthState,
   disconnectGoogleDrive,
+  getResolvedGoogleClientId,
+  saveCustomGoogleClientId,
 } from '@/lib/drive'
+import { exchangeCodeForSession } from '@/lib/supabase'
 import {
   buildCompactStoryBible,
   computeTaskHash,
@@ -119,6 +122,23 @@ describe('Cloud Sync, Drive & AI Integrations (SYNC, DRV, AI)', () => {
       const afterDisconnect = getDriveAuthState()
       expect(afterDisconnect.isConnected).toBe(false)
       expect(afterDisconnect.accessToken).toBeNull()
+    })
+
+    it('resolves and saves custom Google Client ID correctly', () => {
+      saveCustomGoogleClientId('test-client-id-1234.apps.googleusercontent.com')
+      expect(getResolvedGoogleClientId()).toBe('test-client-id-1234.apps.googleusercontent.com')
+
+      // Clear custom ID
+      saveCustomGoogleClientId('')
+      expect(localStorage.getItem('screenplay_studio_google_client_id')).toBeNull()
+    })
+  })
+
+  describe('Supabase Auth & Session Exchange (SYNC-001)', () => {
+    it('handles code exchange gracefully without throw', async () => {
+      const res = await exchangeCodeForSession('dummy_pkce_code')
+      expect(res).toBeDefined()
+      expect(res.error).toBeDefined() // Returns expected configuration error or invalid code error
     })
   })
 

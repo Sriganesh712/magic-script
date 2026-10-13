@@ -4,6 +4,7 @@ import { ProjectsPage } from '@/pages/ProjectsPage'
 import { EditorPage } from '@/pages/EditorPage'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { AuthCallbackPage } from '@/pages/AuthCallbackPage'
 import { Button } from '@/components/ui/button'
 import { Clapperboard, ArrowLeft } from 'lucide-react'
 
@@ -67,6 +68,9 @@ export function AppRouter() {
             </Layout>
           }
         />
+
+        {/* OAuth Authentication Callback */}
+        <Route path="/auth/callback" element={<AuthCallbackPage />} />
 
         {/* Dedicated distraction-free Screenplay Editor */}
         <Route path="/project/:projectId" element={<EditorPage />} />

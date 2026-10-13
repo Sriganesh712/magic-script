@@ -40,27 +40,123 @@ export function disconnectGoogleDrive(): void {
 }
 
 // ============================================================================
+// Google Identity Services Loader & Client ID Resolution
+// ============================================================================
+
+export function getResolvedGoogleClientId(customId?: string): string {
+  if (customId && customId.trim()) return customId.trim()
+  try {
+    const saved = localStorage.getItem('screenplay_studio_google_client_id')
+    if (saved && saved.trim()) return saved.trim()
+  } catch {
+    // Ignore storage errors
+  }
+  return (
+    (import.meta.env.VITE_GOOGLE_DRIVE_CLIENT_ID as string) ||
+    (import.meta.env.GOOGLE_DRIVE_CLIENT_ID as string) ||
+    (import.meta.env.VITE_GOOGLE_CLIENT_ID as string) ||
+    ''
+  ).trim()
+}
+
+export function saveCustomGoogleClientId(clientId: string): void {
+  try {
+    if (clientId.trim()) {
+      localStorage.setItem('screenplay_studio_google_client_id', clientId.trim())
+    } else {
+      localStorage.removeItem('screenplay_studio_google_client_id')
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+export function loadGsiScript(): Promise<boolean> {
+  if (typeof window === 'undefined') return Promise.resolve(false)
+  if ((window as any).google?.accounts?.oauth2) return Promise.resolve(true)
+
+  return new Promise((resolve) => {
+    const existing = document.querySelector('script[src*="accounts.google.com/gsi/client"]')
+    if (existing) {
+      let attempts = 0
+      const interval = setInterval(() => {
+        attempts++
+        if ((window as any).google?.accounts?.oauth2) {
+          clearInterval(interval)
+          resolve(true)
+        } else if (attempts >= 40) {
+          clearInterval(interval)
+          resolve(false)
+        }
+      }, 100)
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = () => {
+      let attempts = 0
+      const interval = setInterval(() => {
+        attempts++
+        if ((window as any).google?.accounts?.oauth2) {
+          clearInterval(interval)
+          resolve(true)
+        } else if (attempts >= 40) {
+          clearInterval(interval)
+          resolve(false)
+        }
+      }, 100)
+    }
+    script.onerror = () => resolve(false)
+    document.head.appendChild(script)
+  })
+}
+
+// ============================================================================
 // Google OAuth Flow (drive.file scope)
 // ============================================================================
 
 export async function requestGoogleDriveAccess(clientId?: string): Promise<{ success: boolean; error?: string }> {
-  const resolvedClientId = clientId || (import.meta.env.VITE_GOOGLE_CLIENT_ID as string)
+  const resolvedClientId = getResolvedGoogleClientId(clientId)
   if (!resolvedClientId) {
     return {
       success: false,
-      error: 'Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID to .env or settings.',
+      error: 'Google Client ID not configured. Please add VITE_GOOGLE_CLIENT_ID or GOOGLE_DRIVE_CLIENT_ID to .env or Settings.',
+    }
+  }
+
+  // Ensure Google Identity Services script is loaded
+  const isLoaded = await loadGsiScript()
+  if (!isLoaded || !(window as any).google?.accounts?.oauth2) {
+    return {
+      success: false,
+      error: 'Google Identity Services library failed to load. Please check your internet connection and ensure third-party scripts/popups are not blocked.',
     }
   }
 
   return new Promise((resolve) => {
-    // Check if Google Identity Services script is loaded
-    if (typeof window !== 'undefined' && (window as any).google?.accounts?.oauth2) {
+    try {
       const client = (window as any).google.accounts.oauth2.initTokenClient({
         client_id: resolvedClientId,
         scope: DRIVE_FILE_SCOPE,
         callback: (response: any) => {
           if (response.error) {
-            resolve({ success: false, error: response.error })
+            console.error('[Google Drive] OAuth response error:', response)
+            let errMsg = response.error
+            if (response.error_description) errMsg += `: ${response.error_description}`
+            if (response.error === 'popup_closed_by_user') {
+              errMsg = 'Sign-in popup was closed before completing authorization.'
+            } else if (response.error === 'access_denied') {
+              errMsg = 'Permission to access Google Drive was denied.'
+            }
+            resolve({ success: false, error: errMsg })
+            return
+          }
+
+          if (!response.access_token) {
+            resolve({ success: false, error: 'No access token received from Google.' })
             return
           }
 
@@ -72,14 +168,20 @@ export async function requestGoogleDriveAccess(clientId?: string): Promise<{ suc
           })
           resolve({ success: true })
         },
+        error_callback: (err: any) => {
+          console.error('[Google Drive] Token client error:', err)
+          let msg = err.message || err.type || 'Google authorization failed.'
+          if (err.type === 'popup_blocked') {
+            msg = 'Popup was blocked by your browser. Please allow popups for this site and retry.'
+          }
+          resolve({ success: false, error: msg })
+        },
       })
+
       client.requestAccessToken({ prompt: 'consent' })
-    } else {
-      // Fallback: simulated connection or token prompt
-      resolve({
-        success: false,
-        error: 'Google Identity Services library not yet loaded. Please check your network connection.',
-      })
+    } catch (err) {
+      console.error('[Google Drive] Exception initiating OAuth:', err)
+      resolve({ success: false, error: (err as Error).message })
     }
   })
 }

@@ -15,6 +15,7 @@ import {
   signOut,
   deleteAccount,
   getSupabaseClient,
+  onAuthStateChange,
   type User,
 } from '@/lib/supabase'
 import { processSyncQueue } from '@/lib/sync'
@@ -22,6 +23,8 @@ import {
   getDriveAuthState,
   requestGoogleDriveAccess,
   disconnectGoogleDrive,
+  getResolvedGoogleClientId,
+  saveCustomGoogleClientId,
   type DriveAuthState,
 } from '@/lib/drive'
 import {
@@ -68,6 +71,8 @@ import {
   FolderSync,
   Bot,
   Key,
+  CheckCircle,
+  AlertCircle,
 } from 'lucide-react'
 
 const SETTINGS_STORAGE_KEY = 'screenplay_studio_global_settings'
@@ -110,6 +115,9 @@ export function SettingsPage() {
 
   // Google Drive state (DRV-001, DRV-005)
   const [driveAuth, setDriveAuth] = useState<DriveAuthState>(getDriveAuthState())
+  const [driveClientId, setDriveClientId] = useState(getResolvedGoogleClientId())
+  const [isDriveConnecting, setIsDriveConnecting] = useState(false)
+  const [driveError, setDriveError] = useState<string | null>(null)
 
   // Groq AI state (AI-006, AI-007)
   const [groqKeyInput, setGroqKeyInput] = useState(getGroqApiKey() || '')
@@ -120,8 +128,15 @@ export function SettingsPage() {
     setMounted(true)
     getDBSize().then((res) => setDbStorage(res)).catch(() => {})
     getCurrentUser().then(setCurrentUser).catch(() => {})
+    const sub = onAuthStateChange((user) => {
+      setCurrentUser(user)
+    })
     setDriveAuth(getDriveAuthState())
+    setDriveClientId(getResolvedGoogleClientId())
     setAiBudget(getAiBudget())
+    return () => {
+      sub?.data?.subscription?.unsubscribe?.()
+    }
   }, [])
 
   const saveSettings = (updated: AppSettings) => {
@@ -248,18 +263,28 @@ export function SettingsPage() {
 
   // Google Drive Connect / Disconnect
   const handleConnectDrive = async () => {
-    const res = await requestGoogleDriveAccess()
-    if (res.success) {
-      setDriveAuth(getDriveAuthState())
-      alert('Connected to Google Drive! Backups will be placed in the "Screenplay Studio" folder.')
-    } else {
-      alert(res.error || 'Failed to connect Google Drive.')
+    try {
+      setIsDriveConnecting(true)
+      setDriveError(null)
+      saveCustomGoogleClientId(driveClientId)
+      const res = await requestGoogleDriveAccess(driveClientId)
+      if (res.success) {
+        setDriveAuth(getDriveAuthState())
+        setDriveError(null)
+      } else {
+        setDriveError(res.error || 'Failed to connect Google Drive.')
+      }
+    } catch (err) {
+      setDriveError((err as Error).message)
+    } finally {
+      setIsDriveConnecting(false)
     }
   }
 
   const handleDisconnectDrive = () => {
     disconnectGoogleDrive()
     setDriveAuth(getDriveAuthState())
+    setDriveError(null)
   }
 
   // Save Groq Key
@@ -565,10 +590,10 @@ export function SettingsPage() {
                 <span>Cloud Account & Sync (Supabase)</span>
               </div>
               <Badge
-                variant={isSupabaseConfigured ? 'secondary' : 'outline'}
+                variant={isSupabaseConfigured ? (currentUser ? 'default' : 'secondary') : 'outline'}
                 className="text-[10px] font-mono"
               >
-                {isSupabaseConfigured ? (currentUser ? 'Connected' : 'Configured') : 'Local-Only Mode'}
+                {isSupabaseConfigured ? (currentUser ? 'Connected & Synced' : 'Configured') : 'Local-Only Mode'}
               </Badge>
             </CardTitle>
             <CardDescription className="text-xs">
@@ -579,16 +604,38 @@ export function SettingsPage() {
           <CardContent className="space-y-4">
             {currentUser ? (
               <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-                  <div>
-                    <span className="text-xs font-semibold text-foreground block">
-                      {currentUser.email}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      User ID: {currentUser.id.slice(0, 18)}...
-                    </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-lg border border-border bg-muted/30">
+                  <div className="flex items-center gap-3">
+                    {currentUser.user_metadata?.avatar_url || currentUser.user_metadata?.picture ? (
+                      <img
+                        src={currentUser.user_metadata.avatar_url || currentUser.user_metadata.picture}
+                        alt="User"
+                        className="w-10 h-10 rounded-full object-cover border border-primary/20 shrink-0"
+                      />
+                    ) : (
+                      <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0">
+                        {(currentUser.email?.[0] || 'U').toUpperCase()}
+                      </div>
+                    )}
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs font-semibold text-foreground truncate">
+                          {currentUser.user_metadata?.full_name || currentUser.email}
+                        </span>
+                        <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
+                          {currentUser.app_metadata?.provider === 'google' ? 'Google' : 'Cloud'}
+                        </Badge>
+                      </div>
+                      <span className="text-[11px] text-muted-foreground block truncate">
+                        {currentUser.email}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground/80 font-mono block truncate">
+                        User ID: {currentUser.id}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
+
+                  <div className="flex items-center gap-2 shrink-0">
                     <Button
                       variant="outline"
                       size="xs"
@@ -629,32 +676,49 @@ export function SettingsPage() {
             ) : isSupabaseConfigured ? (
               <div className="space-y-3">
                 <p className="text-xs text-muted-foreground">
-                  Sign in to seamlessly sync your screenplays across devices.
+                  Sign in with Google or Email to seamlessly backup and sync your screenplays across devices.
                 </p>
+
                 <div className="flex flex-col sm:flex-row gap-2">
-                  <Input
-                    placeholder="name@example.com"
-                    type="email"
-                    value={authEmail}
-                    onChange={(e) => setAuthEmail(e.target.value)}
-                    className="text-xs h-8"
-                  />
                   <Button
-                    size="xs"
-                    onClick={handleSignInEmail}
-                    disabled={!authEmail.trim()}
-                    className="h-8 text-xs shrink-0"
-                  >
-                    Send Magic Link
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="xs"
+                    variant="default"
+                    size="sm"
                     onClick={handleSignInGoogle}
-                    className="h-8 text-xs shrink-0"
+                    className="gap-2 text-xs font-medium"
                   >
-                    Sign in with Google
+                    <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+                    </svg>
+                    <span>Sign in with Google</span>
                   </Button>
+
+                  <div className="flex-1 flex gap-2">
+                    <Input
+                      placeholder="name@example.com"
+                      type="email"
+                      value={authEmail}
+                      onChange={(e) => setAuthEmail(e.target.value)}
+                      className="text-xs h-9"
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleSignInEmail}
+                      disabled={!authEmail.trim()}
+                      className="text-xs shrink-0 h-9"
+                    >
+                      Send Magic Link
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-muted-foreground/80 space-y-1 pt-1">
+                  <p>
+                    OAuth redirect route: <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">http://localhost:5173/auth/callback</code>
+                  </p>
                 </div>
               </div>
             ) : (
@@ -679,10 +743,10 @@ export function SettingsPage() {
                 <span>Google Drive Backups (drive.file scope)</span>
               </div>
               <Badge
-                variant={driveAuth.isConnected ? 'secondary' : 'outline'}
+                variant={driveAuth.isConnected ? 'default' : 'outline'}
                 className="text-[10px] font-mono"
               >
-                {driveAuth.isConnected ? 'Connected' : 'Disconnected'}
+                {driveAuth.isConnected ? 'Connected & Active' : 'Disconnected'}
               </Badge>
             </CardTitle>
             <CardDescription className="text-xs">
@@ -690,15 +754,21 @@ export function SettingsPage() {
             </CardDescription>
           </CardHeader>
 
-          <CardContent className="space-y-3">
+          <CardContent className="space-y-4">
             {driveAuth.isConnected ? (
-              <div className="flex items-center justify-between p-3 rounded-lg border border-border bg-muted/30">
-                <div>
-                  <span className="text-xs font-semibold text-foreground block">
-                    Target Folder: &quot;Screenplay Studio&quot;
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Connected with restricted file scope.
+              <div className="flex items-center justify-between p-3.5 rounded-lg border border-border bg-muted/30">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground">
+                      Target Folder: &quot;Screenplay Studio&quot;
+                    </span>
+                    <Badge variant="secondary" className="text-[9px] px-1.5 py-0 text-emerald-600 dark:text-emerald-400">
+                      <CheckCircle className="w-3 h-3 mr-1 inline" />
+                      Active
+                    </Badge>
+                  </div>
+                  <span className="text-[11px] text-muted-foreground block">
+                    Connected with restricted <code className="font-mono text-[10px]">drive.file</code> scope.
                   </span>
                 </div>
                 <Button
@@ -711,18 +781,56 @@ export function SettingsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div className="space-y-3">
                 <p className="text-xs text-muted-foreground">
-                  Connect your Google Drive to upload PDF, Fountain, and FDX backups directly to your cloud storage.
+                  Connect your Google Drive to upload PDF, Fountain, and FDX backups directly to your private &quot;Screenplay Studio&quot; folder.
                 </p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleConnectDrive}
-                  className="text-xs shrink-0"
-                >
-                  Connect Google Drive
-                </Button>
+
+                {driveError && (
+                  <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/10 text-destructive text-xs space-y-2">
+                    <div className="flex items-center gap-2 font-semibold">
+                      <AlertCircle className="w-4 h-4 shrink-0" />
+                      <span>Google Drive Connection Notice</span>
+                    </div>
+                    <p className="text-[11px] font-mono break-words">{driveError}</p>
+                    <div className="text-[11px] text-foreground/80 space-y-1 pt-1">
+                      <p className="font-medium text-foreground">Setup Checklist in Google Cloud Console:</p>
+                      <ul className="list-disc pl-4 space-y-0.5 text-[10px]">
+                        <li>In <strong>APIs & Services &gt; Credentials &gt; OAuth 2.0 Web Client</strong>:</li>
+                        <li>Add <strong>Authorized JavaScript origins</strong>: <code className="font-mono bg-muted px-1">http://localhost:5173</code> and <code className="font-mono bg-muted px-1">http://localhost</code></li>
+                        <li>In <strong>APIs & Services &gt; Library</strong>: Ensure <strong>Google Drive API</strong> is enabled.</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-foreground">Google Client ID</label>
+                  <div className="flex gap-2">
+                    <Input
+                      placeholder="e.g. 123456789-abc.apps.googleusercontent.com"
+                      value={driveClientId}
+                      onChange={(e) => {
+                        setDriveClientId(e.target.value)
+                        saveCustomGoogleClientId(e.target.value)
+                      }}
+                      className="text-xs h-9 font-mono"
+                    />
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleConnectDrive}
+                      disabled={isDriveConnecting || !driveClientId.trim()}
+                      className="text-xs shrink-0 h-9 gap-1.5"
+                    >
+                      {isDriveConnecting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
+                      <span>{isDriveConnecting ? 'Connecting...' : 'Connect Google Drive'}</span>
+                    </Button>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Populated automatically from <code className="font-mono text-[10px]">VITE_GOOGLE_CLIENT_ID</code> or <code className="font-mono text-[10px]">GOOGLE_DRIVE_CLIENT_ID</code>.
+                  </p>
+                </div>
               </div>
             )}
           </CardContent>

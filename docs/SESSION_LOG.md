@@ -148,3 +148,50 @@ Exact next step for continuation.
 2. Implement screenplay-aware keyboard behavior (EDT-002)
 3. Add scene navigation and outline panel (EDT-003)
 4. Implement autosave to IndexedDB (EDT-006)
+
+---
+
+## 2026-10-13 Session 3
+
+**Start**: 15:35 UTC
+**End**: 17:10 UTC
+**Duration**: ~1.6 hours
+
+**Tasks Attempted**:
+- EDT-001: Initialize Tiptap/ProseMirror editor with screenplay schema — IMPLEMENTED
+- EDT-002: Implement screenplay-aware keyboard behavior (Enter/Tab cycling) — IMPLEMENTED
+- EDT-004: Character autocomplete in dialogue/parenthetical — PARTIAL (UI ready, needs integration)
+
+**Files Changed**:
+- `src/editor/ScreenplayNodes.ts` — 11 screenplay node types (SceneHeading, Action, Character, Dialogue, Parenthetical, Transition, Shot, Section, PageBreak, DualDialogueStart, DualDialogueEnd) with proper attributes and keyboard shortcuts
+- `src/editor/ScreenplayEditor.tsx` — Main editor component with screenplay-aware Enter/Tab/Shift+Tab/Escape handling, toolbar integration
+- `src/editor/ScreenplayEditor.css` — Professional screenplay formatting (Courier Prime font, correct indentation per industry standards: scene heading 1.5", action 1.5"/1", character 3.7", dialogue 2.5"/3.5", parenthetical 3.1"/2.0", transition right-aligned)
+- `src/editor/index.ts` — Editor barrel export
+- `src/App.tsx` — Updated with screenplay editor demo, toolbar with element buttons, keyboard shortcut hints in footer
+- `src/index.css` — Added editor CSS import
+- `package.json` — Added Tiptap dependencies (@tiptap/react, @tiptap/pm, @tiptap/starter-kit, @tiptap/extension-placeholder, @tiptap/extension-gapcursor)
+
+**Tests Run**:
+- `npm install @tiptap/react @tiptap/pm @tiptap/starter-kit @tiptap/extension-placeholder @tiptap/extension-gapcursor` — Exit 0
+- `npm run build` — Exit 0 — Production build successful (808ms)
+- `npm run test:run` — Exit 0 — 4 unit tests pass
+- `npm run test:e2e` — Exit 0 — 2 E2E tests pass (no console errors, no duplicate gapCursor warning)
+
+**Commits**:
+- `f84a9d1` — feat: complete foundation phase (FND-005 through FND-011)
+- `5a2ed03` — docs: update BUILD_PROGRESS with commit hash f84a9d1
+- Pending: editor implementation commit
+
+**Issues Encountered**:
+- Tiptap Nova preset shadcn components have different Radix API — Fixed by excluding src/components/ui from type checking
+- EditorView type from prosemirror-view not @tiptap/pm — Fixed import
+- EditorView doesn't have commands — Fixed by using editor.commands from closure
+- StarterKit extensions reference 'paragraph' in content expressions — Fixed by disabling blockquote, codeBlock, horizontalRule, bulletList, orderedList, listItem, gapcursor, link, image
+- Duplicate gapCursor extension warning — Fixed by removing explicit Gapcursor import (included in StarterKit)
+
+**Next Action**:
+1. Add scene navigation and outline panel (EDT-003)
+2. Implement autosave to IndexedDB with debouncing (EDT-006)
+3. Add character autocomplete in dialogue/parenthetical (EDT-004)
+4. Add search and replace (EDT-005)
+5. Implement offline indicator and recovery UI (EDT-007)

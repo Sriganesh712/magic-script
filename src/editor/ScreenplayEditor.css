@@ -1,0 +1,225 @@
+/**
+ * Screenplay Editor Styles
+ * Professional screenplay formatting in the editor
+ */
+
+@import 'tailwindcss';
+
+@layer components {
+  .screenplay-editor-container {
+    @apply w-full max-w-3xl mx-auto px-4 py-8;
+    font-family: 'Courier Prime', 'Courier New', Courier, monospace;
+    font-size: 12pt;
+    line-height: 1.0;
+    background: white;
+    color: #1f2937;
+  }
+
+  .dark .screenplay-editor-container {
+    background: #0f172a;
+    color: #f1f5f9;
+  }
+
+  /* Screenplay Element Base */
+  .screenplay-element {
+    @apply px-4 py-1 select-none;
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* Scene Heading (Slugline) */
+  .screenplay-element[data-type="scene-heading"] {
+    @apply font-bold uppercase;
+    padding-left: 1.5in; /* 1.5 inches from left */
+    text-indent: -1.5in;
+  }
+
+  /* Action / Description */
+  .screenplay-element[data-type="action"] {
+    @apply leading-normal;
+    padding-left: 1.5in;
+    padding-right: 1in;
+    text-indent: 0;
+  }
+
+  /* Character Cue */
+  .screenplay-element[data-type="character"] {
+    @apply font-bold uppercase;
+    padding-left: 3.7in; /* 3.7 inches from left */
+    padding-right: 1in;
+    text-indent: 0;
+  }
+
+  /* Dialogue */
+  .screenplay-element[data-type="dialogue"] {
+    @apply leading-normal;
+    padding-left: 2.5in; /* 2.5 inches from left */
+    padding-right: 2.5in; /* 3.5 inch width = 6 - 2.5 */
+    text-indent: 0;
+  }
+
+  /* Parenthetical */
+  .screenplay-element[data-type="parenthetical"] {
+    @apply italic leading-normal;
+    padding-left: 3.1in; /* 3.1 inches from left */
+    padding-right: 2.9in; /* 2.0 inch width */
+    text-indent: 0;
+  }
+
+  /* Transition */
+  .screenplay-element[data-type="transition"] {
+    @apply font-bold uppercase text-right;
+    padding-left: 1.5in;
+    padding-right: 1in;
+    text-indent: 0;
+  }
+
+  /* Shot */
+  .screenplay-element[data-type="shot"] {
+    @apply font-bold uppercase;
+    padding-left: 1.5in;
+    text-indent: 0;
+  }
+
+  /* Section */
+  .screenplay-element[data-type="section"] {
+    @apply font-bold uppercase underline;
+    padding-left: 1.5in;
+    text-indent: 0;
+    margin-top: 24pt;
+    page-break-before: always;
+  }
+
+  /* Page Break */
+  .screenplay-element[data-type="page-break"] {
+    @apply border-t-2 border-dashed border-gray-400 my-4;
+    page-break-after: always;
+  }
+
+  /* Dual Dialogue */
+  .screenplay-element[data-type="dual-dialogue-start"] {
+    @apply hidden;
+  }
+
+  .screenplay-element[data-type="dual-dialogue-end"] {
+    @apply hidden;
+  }
+
+  /* Placeholder */
+  .screenplay-placeholder {
+    @apply text-gray-400 italic;
+  }
+
+  .dark .screenplay-placeholder {
+    @apply text-gray-600;
+  }
+
+  /* Inline formatting */
+  .screenplay-editor strong {
+    @apply font-bold;
+  }
+
+  .screenplay-editor em {
+    @apply italic;
+  }
+
+  .screenplay-editor u {
+    @apply underline;
+  }
+
+  .screenplay-editor s {
+    @apply line-through;
+  }
+
+  .screenplay-editor code {
+    @apply font-mono text-sm bg-gray-100 px-1 rounded;
+  }
+
+  .dark .screenplay-editor code {
+    @apply bg-gray-800;
+  }
+
+  /* Selection highlight */
+  .screenplay-editor ::selection {
+    @apply bg-blue-100 text-blue-900;
+  }
+
+  .dark .screenplay-editor ::selection {
+    @apply bg-blue-900 text-blue-100;
+  }
+
+  /* Focus styles */
+  .screenplay-editor:focus {
+    @apply outline-none;
+  }
+
+  .screenplay-editor:focus-within .screenplay-element:has(~ .ProseMirror-selection) {
+    @apply bg-blue-50;
+  }
+
+  .dark .screenplay-editor:focus-within .screenplay-element:has(~ .ProseMirror-selection) {
+    @apply bg-blue-900/20;
+  }
+
+  /* Gapcursor styling */
+  .ProseMirror-gapcursor {
+    @apply relative;
+  }
+
+  .ProseMirror-gapcursor::after {
+    @apply absolute left-0 w-full h-px bg-blue-500;
+    content: '';
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* Print styles for screenplay */
+  @media print {
+    .screenplay-editor-container {
+      @apply max-w-none mx-0 p-0;
+      font-size: 12pt;
+      line-height: 1.0;
+    }
+
+    .screenplay-element[data-type="scene-heading"] {
+      page-break-inside: avoid;
+      page-break-after: avoid;
+    }
+
+    .screenplay-element[data-type="character"] {
+      page-break-inside: avoid;
+      page-break-after: avoid;
+    }
+
+    .screenplay-element[data-type="dialogue"] {
+      page-break-inside: avoid;
+    }
+
+    .screenplay-element[data-type="parenthetical"] {
+      page-break-inside: avoid;
+      page-break-before: avoid;
+    }
+
+    .screenplay-element[data-type="transition"] {
+      page-break-before: always;
+    }
+  }
+}
+
+/* Ensure proper Courier Prime font loading */
+@font-face {
+  font-family: 'Courier Prime';
+  src: local('Courier Prime'), local('Courier New'), local('Courier');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Courier Prime';
+  src: local('Courier Prime Bold'), local('Courier New Bold'), local('Courier Bold');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}

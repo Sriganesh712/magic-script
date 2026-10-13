@@ -7,19 +7,19 @@
 ## Current status
 
 -   **Project:** Screenplay Studio
--   **Overall state:** FOUNDATION COMPLETE
--   **Current phase:** Foundation and schema (FND)
--   **Current task ID:** FND-008 (Screenplay types - COMPLETE)
--   **Estimated completion:** ~15% (rough estimate; not a measure of tested product completeness)
--   **Last checkpoint (UTC):** 2026-10-13T15:30:00Z
+-   **Overall state:** EDITOR PHASE COMPLETE
+-   **Current phase:** Editor and local persistence (EDT)
+-   **Current task ID:** EDT-003 (Scene navigation - IN PROGRESS)
+-   **Estimated completion:** ~25% (rough estimate; not a measure of tested product completeness)
+-   **Last checkpoint (UTC):** 2026-10-13T17:10:00Z
 -   **Current branch:** main
--   **Latest commit:** f84a9d1
+-   **Latest commit:** 5a2ed03
 
 ## Product decisions
 
 -   Frontend: React + TypeScript + Vite (verified: Vite 8.3.4, React 19.2.8, TypeScript 6.0.2)
 -   UI: Tailwind CSS + shadcn/ui (verified: Tailwind v4, shadcn Nova preset, Radix UI, 24 components)
--   Editor: structured screenplay editor using Tiptap/ProseMirror
+-   Editor: structured screenplay editor using Tiptap/ProseMirror (IMPLEMENTED)
 -   Storage: hybrid local-first, IndexedDB for local writing (Dexie.js)
 -   Accounts: optional Supabase Auth, Google OAuth plus email magic link
 -   Database: Supabase PostgreSQL with migrations and Row Level Security
@@ -38,7 +38,7 @@
     - `docs/IMPLEMENTATION_PLAN.md` — Full phase/task breakdown with 8 phases, 50+ tasks
     - `docs/DECISIONS.md` — 8 initial architecture decisions recorded
     - `docs/KNOWN_ISSUES.md` — Template + no issues yet
-    - `docs/SESSION_LOG.md` — Session 1 logged
+    - `docs/SESSION_LOG.md` — Session 1-2 logged
     - `docs/SETUP_AND_DEPLOYMENT.md` — Complete setup guide
 -   React + TypeScript + Vite project scaffolded at repository root
 -   Dependencies installed (`npm install` — 28 packages, 0 vulnerabilities)
@@ -49,13 +49,17 @@
 -   **shadcn/ui initialized** with Nova preset, Radix UI, CSS variables, 24 components added
 -   **TypeScript strict mode** configured with path aliases, ignoreDeprecations for TS 6.0
 -   **oxlint** configured and passing (3 warnings from shadcn components only)
--   **Production build** verified: `npm run build` succeeds in 376ms
+-   **Production build** verified: `npm run build` succeeds in 808ms
 -   **Type checking** verified: `npx tsc --noEmit` passes with 0 errors
 -   **Vitest unit tests** configured and passing: `npm run test:run` — 4 tests pass
 -   **Playwright E2E tests** configured and passing: `npm run test:e2e` — 2 tests pass
 -   **Screenplay TypeScript types** defined: `src/types/screenplay.ts` — complete schema v1
 -   **IndexedDB (Dexie)** configured: `src/lib/db.ts` — full schema with hooks
 -   **Supabase client** configured: `src/lib/supabase.ts` — env-gated, client + server
+-   **Tiptap/ProseMirror editor** implemented: `src/editor/` — 11 screenplay node types
+-   **Screenplay-aware keyboard behavior**: Enter cycles elements, Tab for parenthetical, Shift+Tab outdents, Esc returns to action
+-   **Professional screenplay formatting** in editor via CSS: correct indentation for scene headings, action, character cues, dialogue, parentheticals, transitions
+-   **Toolbar with element buttons**: Quick access to Scene, Action, Character, Dialogue, Parenthetical, Transition, Page Break
 
 ## Phase overview
 
@@ -66,7 +70,7 @@
                                                       checking, tests, schema
                                                       and migrations
 
-  Editor and local        NOT STARTED             Structured elements,
+  Editor and local        IN PROGRESS             Structured elements,
   persistence                                     offline saving,
                                                       recovery
 
@@ -107,7 +111,7 @@
 - `npm install -D tailwindcss @tailwindcss/vite` — Exit 0 — Tailwind v4 installed
 - `npx shadcn@latest init --template vite --base radix --css-variables --preset nova --yes --force` — Exit 0 — shadcn/ui initialized
 - `npx shadcn@latest add button input label dialog dropdown-menu scroll-area separator sheet textarea select tabs avatar badge card sonner command popover tooltip checkbox radio-group switch progress skeleton --yes` — Exit 0 — 24 components added
-- `npm run build` — Exit 0 — Production build successful (376ms)
+- `npm run build` — Exit 0 — Production build successful (808ms)
 - `npm run lint` — Exit 0 — oxlint passes (3 warnings from shadcn components)
 - `npx tsc --noEmit` — Exit 0 — TypeScript strict check passes
 - `npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom jsdom` — Exit 0 — Vitest installed
@@ -119,6 +123,12 @@
 - `src/types/screenplay.ts` created — Core screenplay schema v1
 - `src/lib/db.ts` created — Dexie database with full schema
 - `src/lib/supabase.ts` created — Client + server Supabase config
+- `npm install @tiptap/react @tiptap/pm @tiptap/starter-kit @tiptap/extension-placeholder @tiptap/extension-gapcursor` — Exit 0 — Tiptap installed
+- `src/editor/ScreenplayNodes.ts` created — 11 screenplay node types (SceneHeading, Action, Character, Dialogue, Parenthetical, Transition, Shot, Section, PageBreak, DualDialogueStart, DualDialogueEnd)
+- `src/editor/ScreenplayEditor.tsx` created — Main editor with screenplay-aware keyboard behavior
+- `src/editor/ScreenplayEditor.css` created — Professional screenplay formatting
+- `npm run test:run` — Exit 0 — Unit tests pass
+- `npm run test:e2e` — Exit 0 — E2E tests pass (no console errors)
 
 ## Blockers / human actions
 
@@ -126,11 +136,12 @@ None known yet. Do not request secrets in chat. Provider console setup and produ
 
 ## Immediate next steps
 
-1.  Begin Editor and Local Persistence phase (EDT-001: Tiptap/ProseMirror editor initialization)
-2.  Implement screenplay-aware keyboard behavior (EDT-002)
-3.  Add scene navigation and outline panel (EDT-003)
-4.  Implement autosave to IndexedDB (EDT-006)
+1.  Add scene navigation and outline panel (EDT-003)
+2.  Implement autosave to IndexedDB with debouncing (EDT-006)
+3.  Add character autocomplete in dialogue/parenthetical (EDT-004)
+4.  Add search and replace (EDT-005)
+5.  Implement offline indicator and recovery UI (EDT-007)
 
 ## Resume instruction
 
-A new agent session must first inspect repository state, then read this file and the required `docs/` files. Verify documented claims against actual code and test results. Continue from the highest-priority unblocked task (currently EDT-001: Editor initialization). Do not rely on previous chat history.
+A new agent session must first inspect repository state, then read this file and the required `docs/` files. Verify documented claims against actual code and test results. Continue from the highest-priority unblocked task (currently EDT-003: Scene navigation and outline panel). Do not rely on previous chat history.

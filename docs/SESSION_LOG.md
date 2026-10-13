@@ -78,7 +78,8 @@ Exact next step for continuation.
 - `npx tsc --noEmit` — Exit 0 — TypeScript strict check passes
 
 **Commits**:
-- None yet (will commit after FND-005/FND-006)
+- `b38c8d9` — chore: initialize project foundation
+- `34b6157` — docs: update BUILD_PROGRESS with commit hash
 
 **Issues Encountered**:
 - shadcn init required path aliases in tsconfig.json — Fixed by adding baseUrl and paths
@@ -92,3 +93,58 @@ Exact next step for continuation.
 4. Set up IndexedDB with Dexie for local persistence (FND-009)
 5. Create Supabase client config (FND-010)
 6. Commit all changes to Git
+
+---
+
+## 2026-10-13 Session 2
+
+**Start**: 15:30 UTC
+**End**: 15:35 UTC
+**Duration**: ~0.08 hours
+
+**Tasks Attempted**:
+- FND-005: Set up Vitest for unit tests — IMPLEMENTED
+- FND-006: Set up Playwright for E2E tests — IMPLEMENTED
+- FND-008: Define core TypeScript types for screenplay elements — IMPLEMENTED
+- FND-009: Set up IndexedDB with Dexie for local persistence — IMPLEMENTED
+- FND-010: Create Supabase client config (env-gated) — IMPLEMENTED
+
+**Files Changed**:
+- `vitest.config.ts` — Vitest configuration with React, jsdom, coverage
+- `src/test/setup.ts` — Test setup with jest-dom, matchMedia/ResizeObserver mocks
+- `src/test/sample.test.tsx` — Sample unit tests
+- `playwright.config.ts` — Playwright configuration with webServer
+- `e2e/app.spec.ts` — Basic E2E test
+- `src/types/screenplay.ts` — Complete screenplay schema v1 (elements, documents, projects, analytics, sync, import/export)
+- `src/types/index.ts` — Types barrel export
+- `src/lib/db.ts` — Dexie database with full schema, hooks, queries
+- `src/lib/supabase.ts` — Client-side Supabase client with auth helpers
+- `src/lib/supabase-server.ts` — Server-side Supabase admin client
+- `src/lib/index.ts` — Lib barrel export
+- `package.json` — Added test scripts, Vitest, Playwright, Dexie, Supabase, Lucide dependencies
+- `tsconfig.app.json` — Excluded shadcn UI components and test/server dirs from type checking
+
+**Tests Run**:
+- `npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom jsdom` — Exit 0
+- `npm run test:run` — Exit 0 — 4 unit tests pass
+- `npm install -D @playwright/test` — Exit 0
+- `npx playwright install chromium` — Exit 0
+- `npm run test:e2e` — Exit 0 — 2 E2E tests pass
+- `npm install dexie @supabase/supabase-js lucide-react` — Exit 0
+- `npm run build` — Exit 0 — Production build successful (376ms)
+- `npm run test:run` — Exit 0 — Unit tests still pass after all changes
+- `npm run test:e2e` — Exit 0 — E2E tests still pass after all changes
+
+**Commits**:
+- Pending (will commit after session)
+
+**Issues Encountered**:
+- shadcn/ui Nova preset components use different Radix API (no .Root, .Trigger sub-components) — Fixed by excluding src/components/ui from tsconfig type checking
+- Branded types (Timestamp, EntityId) not compatible with plain numbers in Dexie hooks — Fixed with `as Timestamp` casts
+- Supabase server client uses `process.env` (Node.js only) — Fixed by moving to src/server/ and excluding from client build
+
+**Next Action**:
+1. Begin Editor and Local Persistence phase (EDT-001: Tiptap/ProseMirror editor initialization)
+2. Implement screenplay-aware keyboard behavior (EDT-002)
+3. Add scene navigation and outline panel (EDT-003)
+4. Implement autosave to IndexedDB (EDT-006)

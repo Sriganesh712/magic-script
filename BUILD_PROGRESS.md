@@ -7,13 +7,13 @@
 ## Current status
 
 -   **Project:** Screenplay Studio
--   **Overall state:** FOUNDATION ESTABLISHED
+-   **Overall state:** FOUNDATION COMPLETE
 -   **Current phase:** Foundation and schema (FND)
--   **Current task ID:** FND-005 (Vitest unit test setup)
--   **Estimated completion:** ~8% (rough estimate; not a measure of tested product completeness)
+-   **Current task ID:** FND-008 (Screenplay types - COMPLETE)
+-   **Estimated completion:** ~15% (rough estimate; not a measure of tested product completeness)
 -   **Last checkpoint (UTC):** 2026-10-13T15:30:00Z
 -   **Current branch:** main
--   **Latest commit:** b38c8d9
+-   **Latest commit:** 34b6157
 
 ## Product decisions
 
@@ -49,29 +49,20 @@
 -   **shadcn/ui initialized** with Nova preset, Radix UI, CSS variables, 24 components added
 -   **TypeScript strict mode** configured with path aliases, ignoreDeprecations for TS 6.0
 -   **oxlint** configured and passing (3 warnings from shadcn components only)
--   **Production build** verified: `npm run build` succeeds in 714ms
+-   **Production build** verified: `npm run build` succeeds in 376ms
 -   **Type checking** verified: `npx tsc --noEmit` passes with 0 errors
-
-## Current task
-
-### FND-005 --- Set up Vitest for unit tests
-
-**Acceptance criteria** - Vitest installed and configured - Sample test passes - `npm run test` command works - Coverage reporting configured
-
-**Status:** NOT STARTED
-
-### FND-006 --- Set up Playwright for E2E tests
-
-**Acceptance criteria** - Playwright installed and configured - Sample E2E test passes - `npm run test:e2e` command works - CI-ready configuration
-
-**Status:** NOT STARTED
+-   **Vitest unit tests** configured and passing: `npm run test:run` — 4 tests pass
+-   **Playwright E2E tests** configured and passing: `npm run test:e2e` — 2 tests pass
+-   **Screenplay TypeScript types** defined: `src/types/screenplay.ts` — complete schema v1
+-   **IndexedDB (Dexie)** configured: `src/lib/db.ts` — full schema with hooks
+-   **Supabase client** configured: `src/lib/supabase.ts` — env-gated, client + server
 
 ## Phase overview
 
   -----------------------------------------------------------------------
   Phase                   Status                  Notes
   ----------------------- ----------------------- -----------------------
-  Foundation and schema   IN PROGRESS             Repository setup, type
+  Foundation and schema   COMPLETE                Repository setup, type
                                                       checking, tests, schema
                                                       and migrations
 
@@ -116,9 +107,18 @@
 - `npm install -D tailwindcss @tailwindcss/vite` — Exit 0 — Tailwind v4 installed
 - `npx shadcn@latest init --template vite --base radix --css-variables --preset nova --yes --force` — Exit 0 — shadcn/ui initialized
 - `npx shadcn@latest add button input label dialog dropdown-menu scroll-area separator sheet textarea select tabs avatar badge card sonner command popover tooltip checkbox radio-group switch progress skeleton --yes` — Exit 0 — 24 components added
-- `npm run build` — Exit 0 — Production build successful (714ms)
+- `npm run build` — Exit 0 — Production build successful (376ms)
 - `npm run lint` — Exit 0 — oxlint passes (3 warnings from shadcn components)
 - `npx tsc --noEmit` — Exit 0 — TypeScript strict check passes
+- `npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom jsdom` — Exit 0 — Vitest installed
+- `npm run test:run` — Exit 0 — 4 unit tests pass
+- `npm install -D @playwright/test` — Exit 0 — Playwright installed
+- `npx playwright install chromium` — Exit 0 — Chromium installed
+- `npm run test:e2e` — Exit 0 — 2 E2E tests pass
+- `npm install dexie @supabase/supabase-js lucide-react` — Exit 0 — Dexie, Supabase, Lucide installed
+- `src/types/screenplay.ts` created — Core screenplay schema v1
+- `src/lib/db.ts` created — Dexie database with full schema
+- `src/lib/supabase.ts` created — Client + server Supabase config
 
 ## Blockers / human actions
 
@@ -126,13 +126,11 @@ None known yet. Do not request secrets in chat. Provider console setup and produ
 
 ## Immediate next steps
 
-1.  Set up Vitest for unit tests (FND-005)
-2.  Set up Playwright for E2E tests (FND-006)
-3.  Define core TypeScript types for screenplay elements (FND-008)
-4.  Set up IndexedDB with Dexie for local persistence (FND-009)
-5.  Create Supabase client config (FND-010)
-6.  Commit all changes to Git
+1.  Begin Editor and Local Persistence phase (EDT-001: Tiptap/ProseMirror editor initialization)
+2.  Implement screenplay-aware keyboard behavior (EDT-002)
+3.  Add scene navigation and outline panel (EDT-003)
+4.  Implement autosave to IndexedDB (EDT-006)
 
 ## Resume instruction
 
-A new agent session must first inspect repository state, then read this file and the required `docs/` files. Verify documented claims against actual code and test results. Continue from the highest-priority unblocked task (currently FND-005: Vitest setup). Do not rely on previous chat history.
+A new agent session must first inspect repository state, then read this file and the required `docs/` files. Verify documented claims against actual code and test results. Continue from the highest-priority unblocked task (currently EDT-001: Editor initialization). Do not rely on previous chat history.

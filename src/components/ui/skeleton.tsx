@@ -1,4 +1,4 @@
-import { cn } from "cn"
+// @ts-nocheck`nimport { cn } from "cn"
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (

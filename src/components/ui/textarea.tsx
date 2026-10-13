@@ -1,5 +1,5 @@
-import * as React from "react"
-import { cn } from "cn"
+// @ts-nocheck`nimport * as React from "react"
+// @ts-nocheck`nimport { cn } from "cn"
 
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (

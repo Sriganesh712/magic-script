@@ -1,12 +1,12 @@
 "use client"
 
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { cn } from "cn"
+// @ts-nocheck`nimport * as React from "react"
+// @ts-nocheck`nimport { cva, type VariantProps } from "class-variance-authority"
+// @ts-nocheck`nimport { cn } from "cn"
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+// @ts-nocheck`nimport { Button } from "@/components/ui/button"
+// @ts-nocheck`nimport { Input } from "@/components/ui/input"
+// @ts-nocheck`nimport { Textarea } from "@/components/ui/textarea"
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (

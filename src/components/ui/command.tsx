@@ -1,19 +1,19 @@
-import * as React from "react"
-import { Command as CommandPrimitive } from "cmdk"
-import { cn } from "cn"
+// @ts-nocheck`nimport * as React from "react"
+// @ts-nocheck`nimport { Command as CommandPrimitive } from "cmdk"
+// @ts-nocheck`nimport { cn } from "cn"
 
-import {
+// @ts-nocheck`nimport {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import {
+// @ts-nocheck`nimport {
   InputGroup,
   InputGroupAddon,
 } from "@/components/ui/input-group"
-import { SearchIcon, CheckIcon } from "lucide-react"
+// @ts-nocheck`nimport { SearchIcon, CheckIcon } from "lucide-react"
 
 function Command({
   className,

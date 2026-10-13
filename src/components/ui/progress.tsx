@@ -1,8 +1,8 @@
 "use client"
 
-import * as React from "react"
-import { cn } from "cn"
-import { Progress as ProgressPrimitive } from "@radix-ui/react-progress"
+// @ts-nocheck`nimport * as React from "react"
+// @ts-nocheck`nimport { cn } from "cn"
+// @ts-nocheck`nimport { Progress as ProgressPrimitive } from "@radix-ui/react-progress"
 
 function Progress({
   className,

@@ -11,8 +11,8 @@
 -   **Current phase:** All Phases (FND, EDT, ANA, EXP, REV, SYNC, DRV, AI, HRD) COMPLETE & VERIFIED
 -   **Estimated completion:** 100% (Fully functional, verified local-first production ready)
 -   **Last checkpoint (UTC):** 2026-10-13T14:15:00Z
--   **Current branch:** master
--   **Latest commit:** 88bc99b
+-   **Current branch:** main
+-   **Latest commit:** 0cdba6d
 
 ## Product decisions
 
@@ -36,9 +36,9 @@
 
 -   **Production build**: `npm run build` succeeds in ~2.1s with 0 type errors (`tsc -b && vite build`)
 -   **Linter**: `npm run lint` (oxlint) passes with 0 errors
--   **Unit test suite**: `npm run test:run` passes **110/110 tests across 8 test suites**:
+-   **Unit test suite**: `npm run test:run` passes **112/112 tests across 8 test suites**:
     - `src/test/production.test.ts` (8 tests pass)
-    - `src/test/integrations.test.ts` (9 tests pass)
+    - `src/test/integrations.test.ts` (11 tests pass)
     - `src/test/analytics.test.ts` (38 tests pass)
     - `src/test/export.test.ts` (25 tests pass)
     - `src/test/search-replace.test.ts` (18 tests pass)

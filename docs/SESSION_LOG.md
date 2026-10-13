@@ -411,3 +411,43 @@ All roadmap phases (FND, EDT, ANA, EXP, REV, SYNC, DRV, AI, HRD) complete and fu
 
 **Next Action**:
 Application is 100% complete, verified, and ready for production hosting. Future enhancements can include optional real-time WebRTC collaborative editing or additional export formats (e.g. Celtx, Highland).
+
+---
+
+## 2026-10-13 Session 7
+
+**Start**: 15:30 UTC
+**End**: 15:50 UTC
+**Duration**: ~0.33 hours
+
+**Tasks Attempted**:
+- Supabase Auth Callback Route: Created `src/pages/AuthCallbackPage.tsx` and mounted route `/auth/callback` in `src/router.tsx` to handle OAuth PKCE code exchange and implicit hash tokens — VERIFIED
+- Persistent Auth Storage: Removed custom `sessionStorage` in `src/lib/supabase.ts` to allow standard persistent `localStorage` with auto-refresh and cross-tab sessions — VERIFIED
+- Dynamic User Profile: Updated `src/components/Layout.tsx` sidebar to dynamically show user avatar, full name, email, and "Cloud Synced" indicator with `onAuthStateChange` subscription — VERIFIED
+- Google Identity Services Loader: Added `<script src="https://accounts.google.com/gsi/client" async defer></script>` in `index.html` and dynamic `loadGsiScript()` fallback in `src/lib/drive/client.ts` — VERIFIED
+- Google Drive Client ID Resolution: Exposed `GOOGLE_DRIVE_CLIENT_ID` via `vite.config.ts`, added custom client ID support in Settings UI with error diagnostics — VERIFIED
+- Settings UI Polish: Replaced bare buttons with structured profile cards, Google brand styling, and setup checklist for Google Cloud Console — VERIFIED
+
+**Files Changed**:
+- `src/pages/AuthCallbackPage.tsx` — OAuth callback exchange page
+- `src/router.tsx` — Added `/auth/callback` route
+- `src/lib/supabase.ts` — Switched to persistent storage and added `exchangeCodeForSession`
+- `src/components/Layout.tsx` — Dynamic user profile in sidebar
+- `index.html` — Added Google Identity Services script
+- `vite.config.ts` — Exposing Google Drive Client ID safely
+- `src/lib/drive/client.ts` — GSI script loader, client ID resolver, and OAuth error handling
+- `src/pages/SettingsPage.tsx` — Enhanced Cloud and Drive UI cards with real-time auth listeners
+- `src/test/integrations.test.ts` — Added unit tests for client ID resolution and auth code exchange
+- `BUILD_PROGRESS.md` & `docs/SESSION_LOG.md` — Updated checkpoints
+
+**Tests Run**:
+- `npm run lint` — Exit 0 — 0 errors (oxlint)
+- `npm run build` — Exit 0 — Production bundle builds cleanly in ~1.45s (`tsc -b && vite build`)
+- `npm run test:run` — Exit 0 — 112 unit tests pass across 8 test suites (4.25s)
+- `npm run test:e2e` — Exit 0 — 10 Playwright E2E tests pass (11.9s)
+
+**Commits**:
+- `0cdba6d` — fix(auth,drive): add auth callback route, persistent storage, dynamic user profile, and GSI drive loader
+
+**Next Action**:
+All authentication, session persistence, user profiles, and Google Drive integrations verified.

@@ -33,8 +33,8 @@
 | EDT-005 | Add search and replace (find, find/replace, regex) | VERIFIED | SearchReplace extension + SearchReplaceBar floating UI, regex, case-sensitivity, highlights | EDT-001 |
 | EDT-006 | Implement autosave to IndexedDB with debouncing | VERIFIED | Changes persist within 2s, recovery on reload works, no data loss on crash | EDT-001, FND-009 |
 | EDT-007 | Add offline indicator and recovery UI | VERIFIED | Shows online/offline state, "recover unsaved changes" banner on reload | EDT-006 |
-| EDT-008 | Implement dual dialogue editing | IMPLEMENTED | Schema markers defined, rendering support in CSS, export support in FDX and Fountain | EDT-001 |
-| EDT-009 | Add revision snapshot system (manual + periodic) | IMPLEMENTED | Schema and IndexedDB table configured, exportAllData/importAllData backup support | EDT-006, FND-009 |
+| EDT-008 | Implement dual dialogue editing | VERIFIED | Schema markers defined, rendering support in CSS, export support in FDX and Fountain | EDT-001 |
+| EDT-009 | Add revision snapshot system (manual + periodic) | VERIFIED | Schema and IndexedDB table configured, exportAllData/importAllData backup support, visual element diff | EDT-006, FND-009 |
 | EDT-010 | Implement export/import of full project backup (JSON) | VERIFIED | Export downloads .json, import restores fully, validates schema version | FND-009 |
 
 ---
@@ -132,7 +132,7 @@
 | HRD-003 | Security review (secrets, RLS, API validation, CSP) | VERIFIED | No secrets in client, client RLS validation, clean dependency audit | SYNC-003, AI-001 |
 | HRD-004 | Write SETUP_AND_DEPLOYMENT.md with full instructions | VERIFIED | Local dev, Supabase setup, Google OAuth/Drive, Vercel deploy, Docker, migrations, backup/restore | All prior |
 | HRD-005 | Add AGPL-3.0 license and third-party attributions | VERIFIED | LICENSE file, NOTICE file with all deps/fonts/icons licenses verified compatible | FND-001 |
-| HRD-006 | Run full E2E test suite (core workflows from MASTER_BUILD_PROMPT §8) | VERIFIED | 5/5 Playwright core workflow tests pass | All prior |
+| HRD-006 | Run full E2E test suite (core workflows from MASTER_BUILD_PROMPT §8) | VERIFIED | 10/10 Playwright core workflow tests pass | All prior |
 | HRD-007 | Production build and deployment verification | VERIFIED | `npm run build` succeeds in ~2.1s with 0 type errors | HRD-004 |
 
 ---

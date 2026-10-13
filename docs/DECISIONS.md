@@ -186,3 +186,40 @@
 - Must verify all dependencies, fonts, icons, assets are AGPL-compatible.
 
 **Supersedes**: None (initial decision).
+
+---
+
+## 2026-10-13: Comprehensive 10-Workflow E2E Verification Suite
+
+**Decision**: Expand Playwright test suite from 5 to 10 automated test suites covering each core user workflow enumerated in MASTER_BUILD_PROMPT §8.
+
+**Context**: Section 8 specifies 10 minimum workflow gates: offline project creation, reload recovery, analytics tracking, multi-format export (PDF/Fountain/FDX), local-only operation without keys, Supabase settings, conflict handling, Drive backup settings, AI cache/budget settings, and workspace disaster recovery.
+
+**Alternatives Considered**:
+- Retain 5 E2E tests: Left some production settings and export workflows verified only by unit tests.
+- Rely only on Vitest jsdom unit tests: Unable to test real Chromium DOM layout, navigation, and IndexedDB recovery under real browser conditions.
+
+**Consequences**:
+- `e2e/app.spec.ts` covers 10 full browser workflows in Chromium running in parallel.
+- All 10 tests execute cleanly in under 10 seconds.
+- Continuous confidence in end-to-end user experience across all navigation paths.
+
+**Supersedes**: None.
+
+---
+
+## 2026-10-13: Defensive Autosave Teardown Guard
+
+**Decision**: Add `editor.isDestroyed || !editor.view` check and try-catch around `editor.getHTML()` in `useAutosave` hook.
+
+**Context**: During page navigation or rapid component unmounting in React/Playwright, ProseMirror view can be destroyed before pending debounce flushes execute, which can trigger an unhandled rejection when accessing `editor.getHTML()`.
+
+**Alternatives Considered**:
+- Cancel debounce without attempting save: Could lose the last keystroke if user leaves quickly.
+- Unhandled rejection: Pollutes test logs and can crash test runners.
+
+**Consequences**:
+- Clean teardown with zero unhandled rejections during test runs or fast route transitions.
+- Safely writes if view is active; gracefully aborts if editor was already destroyed.
+
+**Supersedes**: None.

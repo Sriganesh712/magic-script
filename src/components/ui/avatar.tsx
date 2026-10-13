@@ -1,6 +1,10 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Avatar as AvatarPrimitive } from "@radix-ui/react-avatar"
+// @ts-nocheck
+
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { Avatar as AvatarPrimitive } from "@radix-ui/react-avatar"
 
 function Avatar({
   className,

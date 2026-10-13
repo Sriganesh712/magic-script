@@ -13,6 +13,10 @@ import {
   TAB_ELEMENT,
   SHIFT_TAB_ELEMENT
 } from './ScreenplayNodes'
+import { SearchReplace } from './extensions/SearchReplace'
+import { CharacterAutocomplete } from './extensions/CharacterAutocomplete'
+import { SearchReplaceBar } from '@/components/SearchReplaceBar'
+import { CharacterAutocompletePopup } from '@/components/CharacterAutocompletePopup'
 import { generateId } from '@/lib/db'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { EditorView } from 'prosemirror-view'
@@ -75,6 +79,8 @@ export function ScreenplayEditor({
         placeholder,
         emptyNodeClass: 'screenplay-placeholder',
       }),
+      SearchReplace,
+      CharacterAutocomplete,
       ...screenplayNodes,
     ],
     content,
@@ -294,7 +300,9 @@ export function ScreenplayEditor({
   }
 
   return (
-    <div className="screenplay-editor-container">
+    <div className="screenplay-editor-container relative">
+      <SearchReplaceBar editor={editor} />
+      <CharacterAutocompletePopup editor={editor} />
       <EditorContent editor={editor} />
     </div>
   )

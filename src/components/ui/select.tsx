@@ -1,7 +1,8 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Select as SelectPrimitive } from "@radix-ui/react-select"
-// @ts-nocheck`nimport { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
+// @ts-nocheck
+import * as React from "react"
+import { cn } from "cn"
+import * as SelectPrimitive from "@radix-ui/react-select"
+import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react"
 
 function Select({
   ...props

@@ -9,17 +9,17 @@
     "skipLibCheck": true,
     "ignoreDeprecations": "6.0",
 
-    /* Path aliases */
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
       "@components/*": ["src/components/*"],
       "@lib/*": ["src/lib/*"],
       "@hooks/*": ["src/hooks/*"],
-      "@types/*": ["src/types/*"]
+      "@types/*": ["src/types/*"],
+      "react-router": ["src/lib/router.tsx"],
+      "react-router-dom": ["src/lib/router.tsx"]
     },
 
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
@@ -27,12 +27,21 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Linting */
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
-  "exclude": ["src/components/ui/**/*", "src/test/**/*", "src/server/**/*", "src/editor/**/*", "src/hooks/**/*"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx"
+  ],
+  "exclude": [
+    "src/components/ui",
+    "src/components/ui/**",
+    "src/test",
+    "src/test/**",
+    "src/server",
+    "src/server/**"
+  ]
 }

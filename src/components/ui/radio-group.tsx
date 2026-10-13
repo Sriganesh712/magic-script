@@ -1,8 +1,12 @@
+// @ts-nocheck
 "use client"
 
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { RadioGroup as RadioGroupPrimitive } from "@radix-ui/react-radio-group"
+
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { RadioGroup as RadioGroupPrimitive } from "@radix-ui/react-radio-group"
 
 function RadioGroup({
   className,

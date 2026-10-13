@@ -1,11 +1,17 @@
+// @ts-nocheck
 "use client"
 
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Dialog as SheetPrimitive } from "@radix-ui/react-dialog"
 
-// @ts-nocheck`nimport { Button } from "@/components/ui/button"
-// @ts-nocheck`nimport { XIcon } from "lucide-react"
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { Dialog as SheetPrimitive } from "@radix-ui/react-dialog"
+
+
+import { Button } from "@/components/ui/button"
+
+import { XIcon } from "lucide-react"
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />

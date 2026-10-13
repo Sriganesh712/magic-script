@@ -1,6 +1,10 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Switch as SwitchPrimitive } from "@radix-ui/react-switch"
+// @ts-nocheck
+
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { Switch as SwitchPrimitive } from "@radix-ui/react-switch"
 
 function Switch({
   className,

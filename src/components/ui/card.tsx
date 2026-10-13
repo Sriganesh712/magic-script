@@ -1,5 +1,6 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
+// @ts-nocheck
+import * as React from "react"
+import { cn } from "cn"
 
 function Card({
   className,

@@ -1,9 +1,14 @@
+// @ts-nocheck
 "use client"
 
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { DropdownMenu as DropdownMenuPrimitive } from "@radix-ui/react-dropdown-menu"
-// @ts-nocheck`nimport { CheckIcon, ChevronRightIcon } from "lucide-react"
+
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { DropdownMenu as DropdownMenuPrimitive } from "@radix-ui/react-dropdown-menu"
+
+import { CheckIcon, ChevronRightIcon } from "lucide-react"
 
 function DropdownMenu({
   ...props

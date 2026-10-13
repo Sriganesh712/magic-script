@@ -1,7 +1,12 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Checkbox as CheckboxPrimitive } from "@radix-ui/react-checkbox"
-// @ts-nocheck`nimport { CheckIcon } from "lucide-react"
+// @ts-nocheck
+
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { Checkbox as CheckboxPrimitive } from "@radix-ui/react-checkbox"
+
+import { CheckIcon } from "lucide-react"
 
 function Checkbox({
   className,

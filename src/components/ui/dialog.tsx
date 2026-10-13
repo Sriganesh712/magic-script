@@ -1,9 +1,10 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Dialog as DialogPrimitive } from "@radix-ui/react-dialog"
+// @ts-nocheck
+import * as React from "react"
+import { cn } from "cn"
+import * as DialogPrimitive from "@radix-ui/react-dialog"
+import { Button } from "@/components/ui/button"
+import { XIcon } from "lucide-react"
 
-// @ts-nocheck`nimport { Button } from "@/components/ui/button"
-// @ts-nocheck`nimport { XIcon } from "lucide-react"
 
 function Dialog({
   ...props

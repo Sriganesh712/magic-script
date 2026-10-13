@@ -1,6 +1,10 @@
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Popover as PopoverPrimitive } from "@radix-ui/react-popover"
+// @ts-nocheck
+
+import * as React from "react"
+
+import { cn } from "cn"
+
+import { Popover as PopoverPrimitive } from "@radix-ui/react-popover"
 
 function Popover({
   ...props

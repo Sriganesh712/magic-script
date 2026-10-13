@@ -1,9 +1,14 @@
+// @ts-nocheck
 "use client"
 
-// @ts-nocheck`nimport * as React from "react"
-// @ts-nocheck`nimport { cva, type VariantProps } from "class-variance-authority"
-// @ts-nocheck`nimport { cn } from "cn"
-// @ts-nocheck`nimport { Tabs as TabsPrimitive } from "@radix-ui/react-tabs"
+
+import * as React from "react"
+
+import { cva, type VariantProps } from "class-variance-authority"
+
+import { cn } from "cn"
+
+import { Tabs as TabsPrimitive } from "@radix-ui/react-tabs"
 
 function Tabs({
   className,

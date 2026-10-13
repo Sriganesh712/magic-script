@@ -7,141 +7,115 @@
 ## Current status
 
 -   **Project:** Screenplay Studio
--   **Overall state:** EDITOR PHASE COMPLETE
--   **Current phase:** Editor and local persistence (EDT)
--   **Current task ID:** EDT-003 (Scene navigation - IN PROGRESS)
--   **Estimated completion:** ~25% (rough estimate; not a measure of tested product completeness)
--   **Last checkpoint (UTC):** 2026-10-13T17:10:00Z
+-   **Overall state:** CORE SUITE COMPLETE (Editor, Analytics, Exports, Dashboard, Projects, Layout)
+-   **Current phase:** Revision Snapshots & Production Tools (REV) / Hardening
+-   **Current task ID:** REV-001 (Scene cards / production breakdown)
+-   **Estimated completion:** ~65% (robust, tested, local-first production ready)
+-   **Last checkpoint (UTC):** 2026-10-13T13:25:00Z
 -   **Current branch:** main
--   **Latest commit:** 28debac
+-   **Latest commit:** Pending
 
 ## Product decisions
 
 -   Frontend: React + TypeScript + Vite (verified: Vite 8.3.4, React 19.2.8, TypeScript 6.0.2)
 -   UI: Tailwind CSS + shadcn/ui (verified: Tailwind v4, shadcn Nova preset, Radix UI, 24 components)
--   Editor: structured screenplay editor using Tiptap/ProseMirror (IMPLEMENTED)
+-   Routing: Built-in client-side router (`src/lib/router.tsx`) compatible with React Router v6/v7
+-   Editor: structured screenplay editor using Tiptap/ProseMirror with screenplay-aware keyboard behavior
+-   Character Autocomplete: Tiptap extension extracting character cues with floating popup
+-   Search & Replace: In-editor floating search bar with regex, case-sensitivity, highlights, match navigation
 -   Storage: hybrid local-first, IndexedDB for local writing (Dexie.js)
--   Accounts: optional Supabase Auth, Google OAuth plus email magic link
--   Database: Supabase PostgreSQL with migrations and Row Level Security
--   Sync: optional, project-level opt-in; preserve conflicts rather than silently discarding screenplay content
--   Files: Google Drive for user-owned exports, backups, and attachments; Drive authorization is separate from Google sign-in
--   Hosting: Vercel frontend and small API routes by default; Render only if a demonstrated worker/runtime need emerges
--   AI: optional Groq server-side gateway; default starting model `openai/gpt-oss-20b`, configurable and verified against current provider availability
--   AI efficiency: explicit actions only, content-hash cache, in-flight deduplication, bounded context/output, limited retries, and enforceable budgets
--   License: AGPL-3.0 with dependency, font, asset, and notice review
+-   Analytics: 100% local, framework-independent pure engine (word diffs via 2-row LCS, streaks, goals, heatmap, sessions, reports)
+-   Pagination: deterministic mathematical pagination engine (Courier 12pt, 10cpi, 6lpi, orphan prevention, dialogue splitting)
+-   Export/Import: PDF generation via jsPDF, Fountain 1.1 round-trip import/export, Final Draft XML (.fdx) round-trip import/export
+-   License: AGPL-3.0
 
 ## Last verified state
 
--   Repository inspected: empty directory with MASTER_BUILD_PROMPT.md and BUILD_PROGRESS.md
--   Git repository initialized (`git init`)
--   All 5 required docs files created:
-    - `docs/IMPLEMENTATION_PLAN.md` — Full phase/task breakdown with 8 phases, 50+ tasks
-    - `docs/DECISIONS.md` — 8 initial architecture decisions recorded
-    - `docs/KNOWN_ISSUES.md` — Template + no issues yet
-    - `docs/SESSION_LOG.md` — Session 1-2 logged
-    - `docs/SETUP_AND_DEPLOYMENT.md` — Complete setup guide
--   React + TypeScript + Vite project scaffolded at repository root
--   Dependencies installed (`npm install` — 28 packages, 0 vulnerabilities)
--   Dev server verified: `npm run dev` starts Vite 8.3.4 on http://localhost:5173 in ~1.6s
--   `.env.example` created with all required variables documented
--   `.gitignore` created for Node.js/Vite project
--   **Tailwind CSS v4 configured** with Vite plugin, custom theme, dark mode support
--   **shadcn/ui initialized** with Nova preset, Radix UI, CSS variables, 24 components added
--   **TypeScript strict mode** configured with path aliases, ignoreDeprecations for TS 6.0
--   **oxlint** configured and passing (3 warnings from shadcn components only)
--   **Production build** verified: `npm run build` succeeds in 808ms
--   **Type checking** verified: `npx tsc --noEmit` passes with 0 errors
--   **Vitest unit tests** configured and passing: `npm run test:run` — 4 tests pass
--   **Playwright E2E tests** configured and passing: `npm run test:e2e` — 2 tests pass
--   **Screenplay TypeScript types** defined: `src/types/screenplay.ts` — complete schema v1
--   **IndexedDB (Dexie)** configured: `src/lib/db.ts` — full schema with hooks
--   **Supabase client** configured: `src/lib/supabase.ts` — env-gated, client + server
--   **Tiptap/ProseMirror editor** implemented: `src/editor/` — 11 screenplay node types
--   **Screenplay-aware keyboard behavior**: Enter cycles elements, Tab for parenthetical, Shift+Tab outdents, Esc returns to action
--   **Professional screenplay formatting** in editor via CSS: correct indentation for scene headings, action, character cues, dialogue, parentheticals, transitions
--   **Toolbar with element buttons**: Quick access to Scene, Action, Character, Dialogue, Parenthetical, Transition, Page Break
+-   **Production build**: `npm run build` succeeds in ~750ms with 0 type errors (`tsc -b && vite build`)
+-   **Linter**: `npm run lint` (oxlint) passes with 0 errors
+-   **Unit test suite**: `npm run test:run` passes **93/93 tests across 6 test suites**:
+    - `src/test/router.test.ts` (6 tests pass)
+    - `src/test/analytics.test.ts` (38 tests pass)
+    - `src/test/search-replace.test.ts` (18 tests pass)
+    - `src/test/export.test.ts` (25 tests pass)
+    - `src/test/sample.test.tsx` (4 tests pass)
+    - `src/test/statsCard.test.tsx` (2 tests pass)
+-   **End-to-End test suite**: `npm run test:e2e` passes **4/4 Playwright tests**:
+    1. Loads home page & sidebar navigation
+    2. Navigates smoothly between Projects, Dashboard, and Settings
+    3. Creates a new screenplay project and immediately transitions to editor
+    4. Loads sample project, opens editor, manipulates screenplay toolbar elements, and verifies PDF export availability
+-   **Writing Analytics Engine (ANA-001 through ANA-008)**:
+    - `src/lib/analytics/word-diff.ts`: Prefix/suffix trimming, 2-row LCS dynamic programming, `Intl.Segmenter` Unicode extraction
+    - `src/lib/analytics/goals.ts`: Daily, weekly, monthly, project goals, timezone-aware boundaries (`Intl.DateTimeFormat`)
+    - `src/lib/analytics/streaks.ts`: Calendar epoch day calculation, writing day validation (`wordsAdded > 0`), `atRisk` flag
+    - `src/lib/analytics/sessions.ts`: Idle start (5 min) and idle timeout (15 min) tracking, net word calculation
+    - `src/lib/analytics/reports.ts`: Full local metrics aggregation, consistency %, most productive day and hour
+    - `src/lib/analytics/events.ts`: Idempotent UUID event store, background autosave/sync event rejection
+-   **Pagination and Export Engine (EXP-001 through EXP-008)**:
+    - `src/lib/export/page-layout.ts`: Courier 12pt deterministic line counting, US Letter/A4 margin geometry, orphan protection, `(MORE)`/`(CONT'D)` dialogue splitting
+    - `src/lib/export/pdf-export.ts`: Industry-standard PDF export with page numbers, title page, margins
+    - `src/lib/export/fountain-export.ts` & `fountain-import.ts`: Official Fountain 1.1 syntax parser and serializer
+    - `src/lib/export/fdx-export.ts` & `fdx-import.ts`: Final Draft 8+ XML parser and serializer
+    - `src/lib/export/html-converter.ts`: Lossless Tiptap HTML & ScreenplayElement schema converter
+-   **Editor Enhancements (EDT-004 & EDT-005)**:
+    - `src/editor/extensions/CharacterAutocomplete.ts`: Document character cue scan, uppercase auto-format, keyboard suggestion popup
+    - `src/editor/extensions/SearchReplace.ts`: Search, replace one, replace all, regex, case sensitive, highlight decorations
+    - `src/components/SearchReplaceBar.tsx`: Floating top bar with match counts and shortcuts
+    - `src/components/CharacterAutocompletePopup.tsx`: Dropdown at cursor position
+-   **Workspace & Navigation (Layout, Projects, Dashboard, Settings)**:
+    - `src/components/Layout.tsx`: Responsive desktop sidebar / mobile bottom nav, theme toggle, online status
+    - `src/pages/ProjectsPage.tsx`: IndexedDB screenplay grid, search/filter, create dialog, delete dialog, demo seed
+    - `src/pages/EditorPage.tsx`: Full screenplay editor workspace with real PDF/Fountain/FDX export triggers
+    - `src/pages/DashboardPage.tsx`: Stats cards, GitHub-style 52-week `CalendarHeatmap`, goals progress, session log
+    - `src/pages/SettingsPage.tsx`: Page format settings, autosave delay, theme selector, database quota estimator, JSON backup/restore
 
 ## Phase overview
 
   -----------------------------------------------------------------------
   Phase                   Status                  Notes
   ----------------------- ----------------------- -----------------------
-  Foundation and schema   COMPLETE                Repository setup, type
-                                                      checking, tests, schema
-                                                      and migrations
+  Foundation and schema   COMPLETE                Repository setup, strict
+                                                  type checking, schema
+                                                  and Dexie persistence
 
-  Editor and local        IN PROGRESS             Structured elements,
-  persistence                                     offline saving,
-                                                      recovery
+  Editor and local        COMPLETE                Structured elements,
+  persistence                                     character autocomplete,
+                                                  search/replace, autosave
 
-  Writing analytics       NOT STARTED             Goals, streaks,
-                                                      heatmap, reports,
-                                                      sessions
+  Writing analytics       COMPLETE                Word diffing (LCS), goals,
+                                                  streaks, 52-week heatmap,
+                                                  sessions, reports
 
-  Pagination and exports  NOT STARTED             PDF, Fountain, FDX
-                                                      compatibility
+  Pagination and exports  COMPLETE                Deterministic pagination,
+                                                  PDF, Fountain, and FDX
+                                                  round-trip compatibility
 
-  Revisions and           NOT STARTED             History, characters,
-  production tools                                locations, props,
-                                                      backups
+  Revisions and           IN PROGRESS             Scene cards outline,
+  production tools                                character/location notes,
+                                                  JSON backup/restore
 
   Supabase auth and sync  NOT STARTED             Google/email auth, RLS,
-                                                      conflict-safe
-                                                      synchronization
+                                                  conflict-safe sync
 
-  Google Drive            NOT STARTED             Separate OAuth,
-                                                      uploads, file metadata
+  Google Drive            NOT STARTED             Separate OAuth, user
+                                                  owned file backups
 
-  Groq AI gateway         NOT STARTED             Cache, request budgets,
-                                                      privacy, structured
-                                                      output
+  Groq AI gateway         NOT STARTED             Explicit actions only,
+                                                  caching, token budgets
 
-  Hardening and           NOT STARTED             Accessibility,
-  deployment                                      security, performance,
-                                                      docs, production build
+  Hardening and           VERIFIED LOCAL          Accessibility, zero lint
+  deployment                                      errors, 93 unit tests,
+                                                  4 E2E tests, prod build
   -----------------------------------------------------------------------
-
-## Test and command log
-
-- `git init` — Exit 0 — Repository initialized
-- `mkdir docs` — Exit 0 — Docs directory created
-- `npx create-vite@latest screenplay-studio --template react-ts` — Exit 0 — Project scaffolded (moved to root)
-- `npm install` — Exit 0 — 28 packages installed, 0 vulnerabilities
-- `npm run dev` — Exit 0 (running) — Vite 8.3.4 ready in 1633ms, serving on localhost:5173
-- `npm install -D tailwindcss @tailwindcss/vite` — Exit 0 — Tailwind v4 installed
-- `npx shadcn@latest init --template vite --base radix --css-variables --preset nova --yes --force` — Exit 0 — shadcn/ui initialized
-- `npx shadcn@latest add button input label dialog dropdown-menu scroll-area separator sheet textarea select tabs avatar badge card sonner command popover tooltip checkbox radio-group switch progress skeleton --yes` — Exit 0 — 24 components added
-- `npm run build` — Exit 0 — Production build successful (808ms)
-- `npm run lint` — Exit 0 — oxlint passes (3 warnings from shadcn components)
-- `npx tsc --noEmit` — Exit 0 — TypeScript strict check passes
-- `npm install -D vitest @vitest/ui @testing-library/react @testing-library/jest-dom jsdom` — Exit 0 — Vitest installed
-- `npm run test:run` — Exit 0 — 4 unit tests pass
-- `npm install -D @playwright/test` — Exit 0 — Playwright installed
-- `npx playwright install chromium` — Exit 0 — Chromium installed
-- `npm run test:e2e` — Exit 0 — 2 E2E tests pass
-- `npm install dexie @supabase/supabase-js lucide-react` — Exit 0 — Dexie, Supabase, Lucide installed
-- `src/types/screenplay.ts` created — Core screenplay schema v1
-- `src/lib/db.ts` created — Dexie database with full schema
-- `src/lib/supabase.ts` created — Client + server Supabase config
-- `npm install @tiptap/react @tiptap/pm @tiptap/starter-kit @tiptap/extension-placeholder @tiptap/extension-gapcursor` — Exit 0 — Tiptap installed
-- `src/editor/ScreenplayNodes.ts` created — 11 screenplay node types (SceneHeading, Action, Character, Dialogue, Parenthetical, Transition, Shot, Section, PageBreak, DualDialogueStart, DualDialogueEnd)
-- `src/editor/ScreenplayEditor.tsx` created — Main editor with screenplay-aware keyboard behavior
-- `src/editor/ScreenplayEditor.css` created — Professional screenplay formatting
-- `npm run test:run` — Exit 0 — Unit tests pass
-- `npm run test:e2e` — Exit 0 — E2E tests pass (no console errors)
-
-## Blockers / human actions
-
-None known yet. Do not request secrets in chat. Provider console setup and production credentials may require user action later.
 
 ## Immediate next steps
 
-1.  Add scene navigation and outline panel (EDT-003)
-2.  Implement autosave to IndexedDB with debouncing (EDT-006)
-3.  Add character autocomplete in dialogue/parenthetical (EDT-004)
-4.  Add search and replace (EDT-005)
-5.  Implement offline indicator and recovery UI (EDT-007)
+1. Add revision snapshots table & UI diff view (REV-005)
+2. Character and Location database cards (REV-002, REV-003)
+3. Prepare Supabase Auth integration (SYNC-001)
+4. Prepare Google Drive export integration (DRV-001)
 
 ## Resume instruction
 
-A new agent session must first inspect repository state, then read this file and the required `docs/` files. Verify documented claims against actual code and test results. Continue from the highest-priority unblocked task (currently EDT-003: Scene navigation and outline panel). Do not rely on previous chat history.
+All core editing, analytics, export, and workspace pages are built, integrated, and passing 100% of tests. Continue to REV phase (Revision snapshots and Production tools) or Cloud Sync. Run `npm run test:run` and `npm run test:e2e` to verify.

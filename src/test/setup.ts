@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import 'fake-indexeddb/auto'
 import { vi, beforeAll, afterAll } from 'vitest'
 
 // Mock window.matchMedia for components that use it

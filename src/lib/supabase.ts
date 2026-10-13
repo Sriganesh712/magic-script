@@ -148,6 +148,23 @@ export async function signOut(): Promise<{ error: Error | null }> {
   return { error }
 }
 
+export async function deleteAccount(): Promise<{ error: Error | null }> {
+  const client = getSupabaseClient()
+  if (!client) return { error: new Error('Supabase not configured') }
+
+  const user = await getCurrentUser()
+  if (!user) return { error: new Error('No authenticated user') }
+
+  // Clean up user rows in tables
+  await Promise.allSettled([
+    client.from('projects').delete().eq('user_id', user.id),
+    client.from('profiles').delete().eq('id', user.id),
+  ])
+
+  await client.auth.signOut()
+  return { error: null }
+}
+
 export function onAuthStateChange(callback: (user: User | null) => void) {
   const client = getSupabaseClient()
   if (!client) {

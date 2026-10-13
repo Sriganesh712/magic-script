@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react'
 import { useParams, Link } from 'react-router'
 import {
   ScreenplayEditor,
@@ -11,17 +11,25 @@ import {
   insertTransition,
   insertPageBreak,
 } from '@/editor'
+import {
+  CharacterPanel,
+  LocationPanel,
+  NotesPanel,
+  RevisionPanel,
+} from '@/components/production'
 import { useAutosave, useOnlineStatus, RecoveryBanner } from '@/hooks'
 import {
   db,
   initDB,
   generateId,
   type Project,
+  type ProjectStatus,
   type Draft,
   type ScreenplayDocument,
   type EntityId,
   type Timestamp,
   CURRENT_SCHEMA_VERSION,
+  DEFAULT_PAGE_FORMAT,
 } from '@/lib'
 import {
   exportToPDF,
@@ -33,6 +41,13 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import {
   ChevronLeft,
   Save,
   Database,
@@ -42,6 +57,11 @@ import {
   Sparkles,
   Download,
   Upload,
+  Clapperboard,
+  Users,
+  MapPin,
+  StickyNote,
+  History,
 } from 'lucide-react'
 import '@/editor/ScreenplayEditor.css'
 
@@ -49,6 +69,8 @@ const DEFAULT_STARTER_CONTENT = `<p data-type="scene-heading" data-interior="INT
 <p data-type="action">A fresh sheet of paper sits in the typewriter. Sunlight streams through Venetian blinds.</p>
 <p data-type="character" data-name="WRITER">WRITER</p>
 <p data-type="dialogue" data-character-id="writer">Every great story begins with a single word.</p>`
+
+type SidebarTab = 'outline' | 'characters' | 'locations' | 'notes' | 'revisions'
 
 export function EditorPage() {
   const { projectId } = useParams<{ projectId: string }>()
@@ -58,7 +80,8 @@ export function EditorPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [content, setContent] = useState<string>(DEFAULT_STARTER_CONTENT)
   const [wordCount, setWordCount] = useState(0)
-  const [showOutline, setShowOutline] = useState(true)
+  const [showSidebar, setShowSidebar] = useState(true)
+  const [sidebarTab, setSidebarTab] = useState<SidebarTab>('outline')
   const [showRecovery, setShowRecovery] = useState(false)
   const [exportNotice, setExportNotice] = useState<string | null>(null)
 
@@ -142,14 +165,12 @@ export function EditorPage() {
         if (isMounted) {
           setScreenplay(currentScreenplay)
 
-          // If there's saved content in localStorage or custom metadata, load it
           const storageKey = `screenplay_content_${currentScreenplay.id}`
           const cached = localStorage.getItem(storageKey)
           const initialText = cached || DEFAULT_STARTER_CONTENT
           setContent(initialText)
           lastSavedContentRef.current = initialText
 
-          // Calculate initial words
           const text = initialText.replace(/<[^>]*>/g, ' ')
           const words = text.trim().split(/\s+/).filter((w) => w.length > 0).length
           setWordCount(words)
@@ -210,6 +231,38 @@ export function EditorPage() {
     setEditorInstance(editor)
   }, [])
 
+  // Restore snapshot handler
+  const handleRestoreContent = useCallback(
+    (html: string) => {
+      setContent(html)
+      if (screenplay?.id) {
+        localStorage.setItem(`screenplay_content_${screenplay.id}`, html)
+      }
+      if (editorRef.current) {
+        editorRef.current.commands.setContent(html)
+      }
+      const text = html.replace(/<[^>]*>/g, ' ')
+      const words = text.trim().split(/\s+/).filter((w) => w.length > 0).length
+      setWordCount(words)
+    },
+    [screenplay?.id]
+  )
+
+  // Screenplay elements memo for production panels
+  const screenplayElements = useMemo(() => htmlToElements(content), [content])
+
+  // Project status change handler (REV-006)
+  const handleStatusChange = async (newStatus: ProjectStatus) => {
+    if (!project) return
+    const updated: Project = {
+      ...project,
+      status: newStatus,
+      updatedAt: Date.now() as Timestamp,
+    }
+    await db.projects.put(updated)
+    setProject(updated)
+  }
+
   // Toolbar Element Insertion Actions
   const toolbarActions = {
     scene: () => insertSceneHeading(editorRef.current),
@@ -248,6 +301,10 @@ export function EditorPage() {
       if (format === 'PDF') {
         blob = await exportToPDF(doc, {
           format: 'pdf',
+          pageFormat: {
+            ...DEFAULT_PAGE_FORMAT,
+            paperSize: project?.settings?.pageFormat?.paperSize || 'US_LETTER',
+          },
           includeTitlePage: true,
           includePageNumbers: true,
           includeSceneNumbers: false,
@@ -387,7 +444,7 @@ export function EditorPage() {
       {/* Editor Header & Toolbar */}
       <header className="sticky top-0 z-40 bg-card/95 backdrop-blur-md border-b border-border px-4 py-2.5 shadow-xs">
         <div className="max-w-full mx-auto flex flex-wrap items-center justify-between gap-2.5">
-          {/* Left: Back Link & Project Title */}
+          {/* Left: Back Link, Title, Status Selector (REV-006) */}
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="xs" asChild className="gap-1 text-muted-foreground hover:text-foreground">
               <Link to="/">
@@ -399,11 +456,27 @@ export function EditorPage() {
             <Separator orientation="vertical" className="h-4" />
 
             <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-bold text-foreground truncate max-w-[200px] sm:max-w-xs">
+              <h1 className="text-sm sm:text-base font-bold text-foreground truncate max-w-[180px] sm:max-w-xs">
                 {project.name}
               </h1>
+
+              {/* Status Selector */}
+              <Select value={project.status} onValueChange={(val: any) => handleStatusChange(val)}>
+                <SelectTrigger className="h-6 text-[11px] px-2 font-medium bg-muted/60 border-border">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="concept">Concept</SelectItem>
+                  <SelectItem value="outline">Outline</SelectItem>
+                  <SelectItem value="drafting">Drafting</SelectItem>
+                  <SelectItem value="polishing">Polishing</SelectItem>
+                  <SelectItem value="production">Production</SelectItem>
+                  <SelectItem value="archived">Archived</SelectItem>
+                </SelectContent>
+              </Select>
+
               {draft && (
-                <span className="text-[11px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted font-medium hidden sm:inline">
+                <span className="text-[11px] text-muted-foreground px-1.5 py-0.5 rounded bg-muted font-medium hidden md:inline">
                   {draft.name}
                 </span>
               )}
@@ -426,18 +499,18 @@ export function EditorPage() {
             </div>
           </div>
 
-          {/* Right: Export, Backup, Save & Outline Toggle */}
+          {/* Right: Sidebar Toggle, Exports, Save, Backups */}
           <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Outline Toggle */}
+            {/* Production Tools Sidebar Toggle */}
             <Button
-              variant={showOutline ? 'secondary' : 'ghost'}
+              variant={showSidebar ? 'secondary' : 'ghost'}
               size="xs"
-              onClick={() => setShowOutline(!showOutline)}
+              onClick={() => setShowSidebar(!showSidebar)}
               className="gap-1 text-xs"
-              title="Toggle Scene Outline (Left Sidebar)"
+              title="Toggle Production Tools Sidebar"
             >
               <LayoutList className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Outline</span>
+              <span className="hidden sm:inline">Tools</span>
             </Button>
 
             <Separator orientation="vertical" className="h-4 mx-1" />
@@ -577,20 +650,102 @@ export function EditorPage() {
 
       {/* Main Writing Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Desktop Scene Outline Panel */}
-        {showOutline && (
-          <aside className="w-72 lg:w-80 border-r border-border bg-card/60 flex-shrink-0 hidden lg:block overflow-y-auto">
-            <SceneOutlinePanel
-              editor={editorRef.current}
-              onSceneClick={() => {}}
-              onSceneAdd={() =>
-                insertSceneHeading(editorRef.current, {
-                  interior: 'INT',
-                  location: 'NEW LOCATION',
-                  timeOfDay: 'DAY',
-                })
-              }
-            />
+        {/* Production Tools Multi-Tab Sidebar */}
+        {showSidebar && (
+          <aside className="w-80 lg:w-96 border-r border-border bg-card/60 flex flex-col flex-shrink-0 hidden lg:flex overflow-hidden">
+            {/* Sidebar Navigation Tabs */}
+            <div className="flex items-center justify-between border-b border-border bg-muted/30 px-2 py-1.5 shrink-0 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-1">
+                <Button
+                  variant={sidebarTab === 'outline' ? 'secondary' : 'ghost'}
+                  size="xs"
+                  onClick={() => setSidebarTab('outline')}
+                  className="text-xs h-7 px-2 gap-1"
+                >
+                  <Clapperboard className="w-3.5 h-3.5" />
+                  <span>Scenes</span>
+                </Button>
+                <Button
+                  variant={sidebarTab === 'characters' ? 'secondary' : 'ghost'}
+                  size="xs"
+                  onClick={() => setSidebarTab('characters')}
+                  className="text-xs h-7 px-2 gap-1"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span>Characters</span>
+                </Button>
+                <Button
+                  variant={sidebarTab === 'locations' ? 'secondary' : 'ghost'}
+                  size="xs"
+                  onClick={() => setSidebarTab('locations')}
+                  className="text-xs h-7 px-2 gap-1"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Locations</span>
+                </Button>
+                <Button
+                  variant={sidebarTab === 'notes' ? 'secondary' : 'ghost'}
+                  size="xs"
+                  onClick={() => setSidebarTab('notes')}
+                  className="text-xs h-7 px-2 gap-1"
+                >
+                  <StickyNote className="w-3.5 h-3.5" />
+                  <span>Notes</span>
+                </Button>
+                <Button
+                  variant={sidebarTab === 'revisions' ? 'secondary' : 'ghost'}
+                  size="xs"
+                  onClick={() => setSidebarTab('revisions')}
+                  className="text-xs h-7 px-2 gap-1"
+                >
+                  <History className="w-3.5 h-3.5" />
+                  <span>Revisions</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Active Sidebar Tab Content */}
+            <div className="flex-1 overflow-hidden">
+              {sidebarTab === 'outline' && (
+                <SceneOutlinePanel
+                  editor={editorInstance}
+                  screenplayId={screenplay?.id}
+                  projectId={project.id}
+                  onSceneClick={() => {}}
+                  onSceneAdd={() =>
+                    insertSceneHeading(editorRef.current, {
+                      interior: 'INT',
+                      location: 'NEW LOCATION',
+                      timeOfDay: 'DAY',
+                    })
+                  }
+                />
+              )}
+              {sidebarTab === 'characters' && (
+                <CharacterPanel
+                  projectId={project.id}
+                  elements={screenplayElements}
+                />
+              )}
+              {sidebarTab === 'locations' && (
+                <LocationPanel
+                  projectId={project.id}
+                  elements={screenplayElements}
+                />
+              )}
+              {sidebarTab === 'notes' && (
+                <NotesPanel projectId={project.id} />
+              )}
+              {sidebarTab === 'revisions' && (
+                <RevisionPanel
+                  projectId={project.id}
+                  draftId={draft?.id || (project.id as any)}
+                  screenplayId={screenplay?.id || (project.id as any)}
+                  currentContent={content}
+                  onRestoreContent={handleRestoreContent}
+                />
+              )}
+            </div>
           </aside>
         )}
 

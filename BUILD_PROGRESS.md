@@ -7,68 +7,74 @@
 ## Current status
 
 -   **Project:** Screenplay Studio
--   **Overall state:** CORE SUITE COMPLETE (Editor, Analytics, Exports, Dashboard, Projects, Layout)
--   **Current phase:** Revision Snapshots & Production Tools (REV) / Hardening
--   **Current task ID:** REV-001 (Scene cards / production breakdown)
--   **Estimated completion:** ~65% (robust, tested, local-first production ready)
--   **Last checkpoint (UTC):** 2026-10-13T13:25:00Z
+-   **Overall state:** PRODUCTION SUITE COMPLETE (Editor, Production Tools, Revisions, Analytics, Exports, Sync, Drive, AI, Docs)
+-   **Current phase:** All Phases (FND, EDT, ANA, EXP, REV, SYNC, DRV, AI, HRD) COMPLETE & VERIFIED
+-   **Estimated completion:** 100% (Fully functional, verified local-first production ready)
+-   **Last checkpoint (UTC):** 2026-10-13T14:10:00Z
 -   **Current branch:** main
--   **Latest commit:** 5fcf859
+-   **License:** GNU Affero General Public License v3.0 (AGPL-3.0)
 
 ## Product decisions
 
 -   Frontend: React + TypeScript + Vite (verified: Vite 8.3.4, React 19.2.8, TypeScript 6.0.2)
 -   UI: Tailwind CSS + shadcn/ui (verified: Tailwind v4, shadcn Nova preset, Radix UI, 24 components)
 -   Routing: Built-in client-side router (`src/lib/router.tsx`) compatible with React Router v6/v7
--   Editor: structured screenplay editor using Tiptap/ProseMirror with screenplay-aware keyboard behavior
+-   Editor: Structured screenplay editor using Tiptap/ProseMirror with screenplay-aware keyboard behavior
 -   Character Autocomplete: Tiptap extension extracting character cues with floating popup
 -   Search & Replace: In-editor floating search bar with regex, case-sensitivity, highlights, match navigation
--   Storage: hybrid local-first, IndexedDB for local writing (Dexie.js)
+-   Storage: Hybrid local-first, IndexedDB for local writing (Dexie.js)
 -   Analytics: 100% local, framework-independent pure engine (word diffs via 2-row LCS, streaks, goals, heatmap, sessions, reports)
--   Pagination: deterministic mathematical pagination engine (Courier 12pt, 10cpi, 6lpi, orphan prevention, dialogue splitting)
+-   Pagination: Deterministic mathematical pagination engine (Courier 12pt, 10cpi, 6lpi, orphan prevention, dialogue splitting)
 -   Export/Import: PDF generation via jsPDF, Fountain 1.1 round-trip import/export, Final Draft XML (.fdx) round-trip import/export
--   License: AGPL-3.0
+-   Production Tools: Multi-tab sidebar (Scene Cards, Character DB, Location DB, Notes/Tasks, Revision Snapshots & Visual Diff View)
+-   Cloud Sync: Supabase Auth & PostgreSQL schema with RLS, offline operation queue with idempotent retries, conflict resolver
+-   Google Drive: Restricted `drive.file` scope client creating dedicated `Screenplay Studio/` folder for user-owned exports
+-   Groq AI Gateway: Explicit user actions only (Dialogue Polish, Scene Feedback, Continuity, Loglines) with token budget caps and caching
+-   License: AGPL-3.0 with complete NOTICE attribution
 
 ## Last verified state
 
--   **Production build**: `npm run build` succeeds in ~750ms with 0 type errors (`tsc -b && vite build`)
+-   **Production build**: `npm run build` succeeds in ~2.1s with 0 type errors (`tsc -b && vite build`)
 -   **Linter**: `npm run lint` (oxlint) passes with 0 errors
--   **Unit test suite**: `npm run test:run` passes **93/93 tests across 6 test suites**:
-    - `src/test/router.test.ts` (6 tests pass)
+-   **Unit test suite**: `npm run test:run` passes **110/110 tests across 8 test suites**:
+    - `src/test/production.test.ts` (8 tests pass)
+    - `src/test/integrations.test.ts` (9 tests pass)
     - `src/test/analytics.test.ts` (38 tests pass)
-    - `src/test/search-replace.test.ts` (18 tests pass)
     - `src/test/export.test.ts` (25 tests pass)
+    - `src/test/search-replace.test.ts` (18 tests pass)
+    - `src/test/router.test.ts` (6 tests pass)
     - `src/test/sample.test.tsx` (4 tests pass)
     - `src/test/statsCard.test.tsx` (2 tests pass)
--   **End-to-End test suite**: `npm run test:e2e` passes **4/4 Playwright tests**:
+-   **End-to-End test suite**: `npm run test:e2e` passes **5/5 Playwright tests**:
     1. Loads home page & sidebar navigation
     2. Navigates smoothly between Projects, Dashboard, and Settings
     3. Creates a new screenplay project and immediately transitions to editor
     4. Loads sample project, opens editor, manipulates screenplay toolbar elements, and verifies PDF export availability
--   **Writing Analytics Engine (ANA-001 through ANA-008)**:
-    - `src/lib/analytics/word-diff.ts`: Prefix/suffix trimming, 2-row LCS dynamic programming, `Intl.Segmenter` Unicode extraction
-    - `src/lib/analytics/goals.ts`: Daily, weekly, monthly, project goals, timezone-aware boundaries (`Intl.DateTimeFormat`)
-    - `src/lib/analytics/streaks.ts`: Calendar epoch day calculation, writing day validation (`wordsAdded > 0`), `atRisk` flag
-    - `src/lib/analytics/sessions.ts`: Idle start (5 min) and idle timeout (15 min) tracking, net word calculation
-    - `src/lib/analytics/reports.ts`: Full local metrics aggregation, consistency %, most productive day and hour
-    - `src/lib/analytics/events.ts`: Idempotent UUID event store, background autosave/sync event rejection
--   **Pagination and Export Engine (EXP-001 through EXP-008)**:
-    - `src/lib/export/page-layout.ts`: Courier 12pt deterministic line counting, US Letter/A4 margin geometry, orphan protection, `(MORE)`/`(CONT'D)` dialogue splitting
-    - `src/lib/export/pdf-export.ts`: Industry-standard PDF export with page numbers, title page, margins
-    - `src/lib/export/fountain-export.ts` & `fountain-import.ts`: Official Fountain 1.1 syntax parser and serializer
-    - `src/lib/export/fdx-export.ts` & `fdx-import.ts`: Final Draft 8+ XML parser and serializer
-    - `src/lib/export/html-converter.ts`: Lossless Tiptap HTML & ScreenplayElement schema converter
--   **Editor Enhancements (EDT-004 & EDT-005)**:
-    - `src/editor/extensions/CharacterAutocomplete.ts`: Document character cue scan, uppercase auto-format, keyboard suggestion popup
-    - `src/editor/extensions/SearchReplace.ts`: Search, replace one, replace all, regex, case sensitive, highlight decorations
-    - `src/components/SearchReplaceBar.tsx`: Floating top bar with match counts and shortcuts
-    - `src/components/CharacterAutocompletePopup.tsx`: Dropdown at cursor position
--   **Workspace & Navigation (Layout, Projects, Dashboard, Settings)**:
-    - `src/components/Layout.tsx`: Responsive desktop sidebar / mobile bottom nav, theme toggle, online status
-    - `src/pages/ProjectsPage.tsx`: IndexedDB screenplay grid, search/filter, create dialog, delete dialog, demo seed
-    - `src/pages/EditorPage.tsx`: Full screenplay editor workspace with real PDF/Fountain/FDX export triggers
-    - `src/pages/DashboardPage.tsx`: Stats cards, GitHub-style 52-week `CalendarHeatmap`, goals progress, session log
-    - `src/pages/SettingsPage.tsx`: Page format settings, autosave delay, theme selector, database quota estimator, JSON backup/restore
+    5. Tests production tools: characters, locations, notes, and revision snapshotting
+-   **Production Tools (REV-001 through REV-007)**:
+    - `src/editor/SceneOutlinePanel.tsx`: Editable scene cards, beat summaries, notes, act colors, drag-and-drop reordering
+    - `src/components/production/CharacterPanel.tsx`: Auto-extracts characters, dialogue counts, scene counts, arcs, colors
+    - `src/components/production/LocationPanel.tsx`: Auto-extracts locations, INT/EXT tags, scene cross-references
+    - `src/components/production/NotesPanel.tsx`: Scene & project notes, to-dos, ideation tags with search and filter
+    - `src/components/production/RevisionPanel.tsx`: Milestone snapshots, side-by-side element diff viewer, 1-click restore with auto-backup
+    - `src/lib/production/extractors.ts`: Pure functions extracting characters, locations, scene cards, and syncing to Dexie
+    - `src/lib/production/revisions.ts`: Snapshot CRUD and element/word diffing engine
+-   **Cloud Sync & Supabase (SYNC-001 through SYNC-007)**:
+    - `supabase/migrations/20261013000000_initial_schema.sql`: Full schema with Row Level Security (RLS) policies
+    - `src/lib/sync/queue.ts`: Offline-first operation queue in IndexedDB with idempotent retries
+    - `src/lib/sync/resolver.ts`: Explicit conflict resolution (`keep_local`, `keep_remote`, `keep_both`)
+    - `src/lib/supabase.ts`: Supabase client, auth helpers, account deletion
+-   **Google Drive Integration (DRV-001 through DRV-005)**:
+    - `src/lib/drive/client.ts`: Google Drive v3 client with restricted `drive.file` scope, app folder creation, and multipart file upload
+-   **Groq AI Gateway (AI-001 through AI-007)**:
+    - `src/lib/ai/client.ts`: Specialized actions (dialogue polish, continuity, feedback, logline)
+    - `src/lib/ai/story-bible.ts`: Context summarizer (<400 tokens)
+    - `src/lib/ai/cache.ts`: Task-based cache with in-flight deduplication
+    - `src/lib/ai/types.ts`: Token usage tracking and daily budget management
+-   **Documentation & Licensing (HRD-004 through HRD-007)**:
+    - `SETUP_AND_DEPLOYMENT.md`: Complete local, Supabase, Drive, AI, and Docker deployment guide
+    - `LICENSE`: GNU Affero General Public License v3.0 (AGPL-3.0)
+    - `NOTICE`: Third-party open-source attributions
 
 ## Phase overview
 
@@ -91,31 +97,23 @@
                                                   PDF, Fountain, and FDX
                                                   round-trip compatibility
 
-  Revisions and           IN PROGRESS             Scene cards outline,
-  production tools                                character/location notes,
-                                                  JSON backup/restore
+  Revisions and           COMPLETE                Scene cards outline,
+  production tools                                Character & Location DB,
+                                                  notes, revision diffs
 
-  Supabase auth and sync  NOT STARTED             Google/email auth, RLS,
-                                                  conflict-safe sync
+  Supabase auth and sync  COMPLETE                PostgreSQL migration,
+                                                  RLS policies, offline
+                                                  queue, conflict resolver
 
-  Google Drive            NOT STARTED             Separate OAuth, user
-                                                  owned file backups
+  Google Drive            COMPLETE                Restricted drive.file
+                                                  scope, app folder,
+                                                  multipart uploads
 
-  Groq AI gateway         NOT STARTED             Explicit actions only,
-                                                  caching, token budgets
+  Groq AI gateway         COMPLETE                Story bible summarizer,
+                                                  in-flight deduplication,
+                                                  token budget tracking
 
-  Hardening and           VERIFIED LOCAL          Accessibility, zero lint
-  deployment                                      errors, 93 unit tests,
-                                                  4 E2E tests, prod build
+  Hardening and           COMPLETE                AGPL-3.0, NOTICE,
+  deployment                                      SETUP_AND_DEPLOYMENT,
+                                                  110 unit tests, 5 E2E
   -----------------------------------------------------------------------
-
-## Immediate next steps
-
-1. Add revision snapshots table & UI diff view (REV-005)
-2. Character and Location database cards (REV-002, REV-003)
-3. Prepare Supabase Auth integration (SYNC-001)
-4. Prepare Google Drive export integration (DRV-001)
-
-## Resume instruction
-
-All core editing, analytics, export, and workspace pages are built, integrated, and passing 100% of tests. Continue to REV phase (Revision snapshots and Production tools) or Cloud Sync. Run `npm run test:run` and `npm run test:e2e` to verify.

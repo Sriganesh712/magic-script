@@ -1,6 +1,10 @@
 export * from './db'
 export * from './supabase'
 export * from './export'
+export * from './production'
+export * from './sync'
+export * from './drive'
+export * from './ai'
 export type {
   EntityId, Timestamp, ScreenplayDocument, Project, ProjectStatus,
   Draft, SceneCard, Character, Location, Prop, Note, RevisionSnapshot,

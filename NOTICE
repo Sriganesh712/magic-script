@@ -1,0 +1,65 @@
+Screenplay Studio
+Copyright (c) 2026 Screenplay Studio Contributors.
+Licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+This product includes software developed by third-party projects:
+
+1. React & React DOM
+   Copyright (c) Meta Platforms, Inc. and affiliates.
+   Licensed under the MIT License.
+   https://react.dev/
+
+2. Vite
+   Copyright (c) 2019-present Evan You & Vite Contributors.
+   Licensed under the MIT License.
+   https://vite.dev/
+
+3. Tiptap & ProseMirror
+   Copyright (c) 2020-present ueberdosis GbR (Tiptap).
+   Copyright (c) 2015-present Marijn Haverbeke and contributors (ProseMirror).
+   Licensed under the MIT License.
+   https://tiptap.dev/ | https://prosemirror.net/
+
+4. Dexie.js
+   Copyright (c) 2014-present David Fahlander and Dexie.js contributors.
+   Licensed under the Apache License 2.0.
+   https://dexie.org/
+
+5. Tailwind CSS
+   Copyright (c) Tailwind Labs, Inc.
+   Licensed under the MIT License.
+   https://tailwindcss.com/
+
+6. Radix UI (Primitives)
+   Copyright (c) 2022 WorkOS.
+   Licensed under the MIT License.
+   https://www.radix-ui.com/
+
+7. Lucide Icons
+   Copyright (c) Lucide Contributors.
+   Licensed under the ISC License.
+   https://lucide.dev/
+
+8. jsPDF
+   Copyright (c) 2010-present James Hall and parallax.
+   Licensed under the MIT License.
+   https://github.com/parallax/jsPDF
+
+9. Supabase JavaScript Client
+   Copyright (c) 2020 Supabase Inc.
+   Licensed under the MIT License.
+   https://supabase.com/
+
+10. Vitest
+    Copyright (c) 2021-present Anthony Fu and Vitest contributors.
+    Licensed under the MIT License.
+    https://vitest.dev/
+
+11. Playwright
+    Copyright (c) Microsoft Corporation.
+    Licensed under the Apache License 2.0.
+    https://playwright.dev/
+
+Courier Prime typeface:
+Courier Prime is designed by Alan Dague-Greene for John August and Quote-Unquote Apps.
+Licensed under the SIL Open Font License 1.1.

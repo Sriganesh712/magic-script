@@ -80,4 +80,62 @@ test.describe('Screenplay Studio - Comprehensive E2E Test Suite', () => {
     const pdfBtn = page.getByRole('button', { name: /PDF/i })
     await expect(pdfBtn).toBeVisible()
   })
+
+  test('5. tests production tools: characters, locations, notes, and revision snapshotting', async ({ page }) => {
+    await page.goto('/')
+
+    // Load sample or open existing project
+    const openBtn = page.getByRole('button', { name: /Open/i }).first()
+    if (await openBtn.isVisible()) {
+      await openBtn.click()
+    } else {
+      const sampleBtn = page.getByRole('button', { name: /Load Sample Project/i })
+      await sampleBtn.click()
+      await page.getByRole('button', { name: /Open/i }).first().click()
+    }
+
+    // Verify editor is visible
+    await expect(page.locator('.screenplay-editor')).toBeVisible({ timeout: 15000 })
+
+    // Check sidebar tabs exist
+    const charactersTab = page.getByRole('button', { name: /Characters/i })
+    await expect(charactersTab).toBeVisible()
+    await charactersTab.click()
+    await expect(page.getByText(/Characters \(/i)).toBeVisible()
+
+    // Check locations tab
+    const locationsTab = page.getByRole('button', { name: /Locations/i })
+    await expect(locationsTab).toBeVisible()
+    await locationsTab.click()
+    await expect(page.getByText(/Locations \(/i)).toBeVisible()
+
+    // Check notes tab
+    const notesTab = page.getByRole('button', { name: /Notes/i })
+    await expect(notesTab).toBeVisible()
+    await notesTab.click()
+    await expect(page.getByText(/Notes & Tasks/i)).toBeVisible()
+
+    // Check revisions tab and take a snapshot
+    const revisionsTab = page.getByRole('button', { name: /Revisions/i })
+    await expect(revisionsTab).toBeVisible()
+    await revisionsTab.click()
+    await expect(page.getByText(/Revisions \(/i)).toBeVisible()
+
+    // Click Snapshot button
+    const snapshotBtn = page.getByRole('button', { name: /Snapshot/i })
+    await expect(snapshotBtn).toBeVisible()
+    await snapshotBtn.click()
+
+    // Fill snapshot name
+    const labelInput = page.getByPlaceholder(/Blue Revision|Director Notes/i)
+    await expect(labelInput).toBeVisible()
+    await labelInput.fill('Golden Master')
+
+    // Submit snapshot
+    const saveSnapshotBtn = page.getByRole('button', { name: /Save Snapshot/i })
+    await saveSnapshotBtn.click()
+
+    // Verify snapshot appears in revision list
+    await expect(page.getByText('Golden Master')).toBeVisible({ timeout: 5000 })
+  })
 })

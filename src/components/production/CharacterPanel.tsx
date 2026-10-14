@@ -59,11 +59,7 @@ export function CharacterPanel({
 
   useEffect(() => {
     loadCharacters()
-  }, [projectId, elements])
-
-  useEffect(() => {
-    void handleSyncWithScript()
-  }, [projectId, elements])
+  }, [projectId])
 
   // Sync / Auto-extract from editor elements
   const handleSyncWithScript = async () => {
@@ -72,13 +68,35 @@ export function CharacterPanel({
       const existing = await db.characters.where('projectId').equals(projectId).toArray()
       const extracted = extractCharactersFromElements(elements, projectId, existing)
       await db.characters.bulkPut(extracted)
-      setCharacters(extracted)
+      const extractedNames = extracted.map((character) => character.name.toUpperCase())
+      const stalePartialIds = existing
+        .filter((character) => {
+          const name = character.name.toUpperCase()
+          return (
+            character.dialogueCount === 0 &&
+            character.sceneCount === 0 &&
+            extractedNames.some((current) => current.startsWith(name) && current !== name)
+          )
+        })
+        .map((character) => character.id)
+      if (stalePartialIds.length > 0) {
+        await db.characters.bulkDelete(stalePartialIds)
+      }
+      setCharacters(extracted.filter((character) => !stalePartialIds.includes(character.id)))
     } catch (err) {
       console.error('[CharacterPanel] Sync failed:', err)
     } finally {
       setIsLoading(false)
     }
+
   }
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      void handleSyncWithScript()
+    }, 500)
+    return () => window.clearTimeout(timeout)
+  }, [projectId, elements])
 
   const handleOpenAdd = () => {
     setEditingChar(null)

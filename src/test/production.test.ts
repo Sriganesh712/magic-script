@@ -106,6 +106,12 @@ describe('Production Engine (REV-001, REV-002, REV-003, REV-004, REV-005)', () =
   ]
 
   describe('Character Extraction (REV-002)', () => {
+    it('does not persist an unfinished character cue', () => {
+      const unfinished = sampleElements.slice(0, 3)
+      const chars = extractCharactersFromElements(unfinished, dummyProjectId)
+      expect(chars).toHaveLength(0)
+    })
+
     it('extracts characters and calculates dialogue and scene frequencies', () => {
       const chars = extractCharactersFromElements(sampleElements, dummyProjectId)
       expect(chars).toHaveLength(2)

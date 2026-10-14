@@ -735,7 +735,10 @@ export function SettingsPage() {
 
                 <div className="text-[11px] text-muted-foreground/80 space-y-1 pt-1">
                   <p>
-                    OAuth redirect route: <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">http://localhost:5173/auth/callback</code>
+                    OAuth redirect route:{' '}
+                    <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">
+                      {typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:5173/auth/callback'}
+                    </code>
                   </p>
                 </div>
               </div>

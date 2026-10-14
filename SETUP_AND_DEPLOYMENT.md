@@ -165,7 +165,25 @@ Deploy directly with Vercel CLI or Git integration:
 ```bash
 npx vercel
 ```
-Vercel automatically detects Vite. Set SPA routing to `index.html`.
+
+##### Critical Settings for Public Mobile & Multi-User Access:
+1. **Disable Vercel Authentication (Deployment Protection)**:
+   - Go to **Vercel Dashboard** > Select your project > **Settings** > **Deployment Protection**.
+   - Under **Vercel Authentication**: Change from **Standard Protection / Enabled** to **Disabled**.
+   - *Why?* If Vercel Authentication is enabled, any visitor or mobile device not already logged into your Vercel account will be intercepted with a "Log in to Vercel" prompt.
+2. **Supabase URL Configuration**:
+   - Go to **Supabase Dashboard** > **Authentication** > **URL Configuration**.
+   - **Site URL**: Set to your canonical production URL: `https://your-app.vercel.app`
+   - **Redirect URLs (Allowlist)**: Add:
+     - `https://your-app.vercel.app/**`
+     - `https://your-app.vercel.app/auth/callback`
+     - `https://*.vercel.app/**`
+     - `http://localhost:5173/**`
+     - `http://localhost:5173/auth/callback`
+3. **Google Cloud Console OAuth**:
+   - Go to **Google Cloud Console** > **APIs & Services** > **Credentials** > Your Web Client.
+   - **Authorized JavaScript origins**: Add `https://your-app.vercel.app` (and `http://localhost:5173`).
+   - In Supabase, verify Google Provider callback URL is added to **Authorized redirect URIs**: `https://<your-project-id>.supabase.co/auth/v1/callback`.
 
 #### 2. Docker
 A lightweight Nginx container can serve the static build:

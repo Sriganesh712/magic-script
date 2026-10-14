@@ -2,13 +2,13 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/|assets/|favicon\\.svg|icons\\.svg).*)",
       "destination": "/index.html"
     }
   ],
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/((?!api/|assets/|favicon\\.svg|icons\\.svg).*)",
       "headers": [
         {
           "key": "X-Content-Type-Options",

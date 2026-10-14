@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react'
 import type { Note, EntityId } from '@/types'
 import { db, generateId } from '@/lib/db'
 import { filterNotes } from '@/lib/production/notes'
+import { enqueueSyncOp } from '@/lib/sync'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -87,12 +88,14 @@ export function NotesPanel({ projectId, activeSceneId }: NotesPanelProps) {
     }
 
     await db.notes.add(newNote)
+    await enqueueSyncOp(projectId, 'note', newNote.id, 'create', newNote)
     setIsDialogOpen(false)
     await loadNotes()
   }
 
   const handleDelete = async (id: EntityId) => {
     await db.notes.delete(id)
+    await enqueueSyncOp(projectId, 'note', id, 'delete')
     await loadNotes()
   }
 

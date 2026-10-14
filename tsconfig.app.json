@@ -37,8 +37,6 @@
     "src/**/*.tsx"
   ],
   "exclude": [
-    "src/components/ui",
-    "src/components/ui/**",
     "src/test",
     "src/test/**",
     "src/server",

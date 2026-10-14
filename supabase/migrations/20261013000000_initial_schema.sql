@@ -27,6 +27,10 @@ CREATE POLICY "Users can insert own profile"
   ON public.profiles FOR INSERT
   WITH CHECK (auth.uid() = id);
 
+CREATE POLICY "Users can delete own profile"
+  ON public.profiles FOR DELETE
+  USING (auth.uid() = id);
+
 -- ============================================================================
 -- Projects Table
 -- ============================================================================
@@ -158,8 +162,11 @@ CREATE TABLE IF NOT EXISTS public.revisions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
+ALTER TABLE public.revisions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+
 CREATE INDEX IF NOT EXISTS idx_revisions_project_id ON public.revisions(project_id);
 CREATE INDEX IF NOT EXISTS idx_revisions_user_id ON public.revisions(user_id);
+CREATE INDEX IF NOT EXISTS idx_revisions_updated_at ON public.revisions(updated_at DESC);
 
 ALTER TABLE public.revisions ENABLE ROW LEVEL SECURITY;
 
@@ -169,6 +176,11 @@ CREATE POLICY "Users can view own revisions"
 
 CREATE POLICY "Users can insert own revisions"
   ON public.revisions FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own revisions"
+  ON public.revisions FOR UPDATE
+  USING (auth.uid() = user_id)
   WITH CHECK (auth.uid() = user_id);
 
 CREATE POLICY "Users can delete own revisions"

@@ -5,6 +5,7 @@
 
 import type { EntityId, Timestamp, Note } from '@/types'
 import { db, generateId } from '@/lib/db'
+import { enqueueSyncOp } from '@/lib/sync'
 
 export async function createNote(params: {
   projectId: EntityId
@@ -24,6 +25,7 @@ export async function createNote(params: {
   }
 
   await db.notes.add(note)
+  await enqueueSyncOp(note.projectId, 'note', note.id, 'create', note)
   return note
 }
 
@@ -53,11 +55,16 @@ export async function updateNote(
   }
 
   await db.notes.put(updated)
+  await enqueueSyncOp(updated.projectId, 'note', updated.id, 'update', updated)
   return updated
 }
 
 export async function deleteNote(noteId: EntityId): Promise<void> {
+  const existing = await db.notes.get(noteId)
   await db.notes.delete(noteId)
+  if (existing) {
+    await enqueueSyncOp(existing.projectId, 'note', noteId, 'delete')
+  }
 }
 
 export function filterNotes(notes: Note[], query: string, typeFilter?: string): Note[] {

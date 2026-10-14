@@ -84,15 +84,15 @@ export const SceneHeading = Node.create({
   group: 'block',
   content: 'inline*',
   defining: true,
-  priority: 100,
+  priority: 90,
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      interior: { default: 'INT', rendered: false },
-      location: { default: '', rendered: false },
-      timeOfDay: { default: '', rendered: false },
-      sceneNumber: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      interior: { default: 'INT', rendered: true, renderHTML: (attributes) => ({ 'data-interior': attributes.interior }), parseHTML: (element) => element.getAttribute('data-interior') },
+      location: { default: '', rendered: true, renderHTML: (attributes) => ({ 'data-location': attributes.location }), parseHTML: (element) => element.getAttribute('data-location') },
+      timeOfDay: { default: '', rendered: true, renderHTML: (attributes) => ({ 'data-time-of-day': attributes.timeOfDay }), parseHTML: (element) => element.getAttribute('data-time-of-day') },
+      sceneNumber: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-scene-number': attributes.sceneNumber }), parseHTML: (element) => element.getAttribute('data-scene-number') },
     }
   },
 
@@ -120,11 +120,11 @@ export const Action = Node.create({
   group: 'block',
   content: 'inline*',
   defining: true,
-  priority: 90,
+  priority: 1000,
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
     }
   },
 
@@ -156,9 +156,10 @@ export const Character = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      extension: { default: '', rendered: false },
-      characterId: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      extension: { default: '', rendered: true, renderHTML: (attributes) => ({ 'data-extension': attributes.extension }), parseHTML: (element) => element.getAttribute('data-extension') },
+      characterId: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-character-id': attributes.characterId }), parseHTML: (element) => element.getAttribute('data-character-id') },
+      name: { default: '', rendered: true, renderHTML: (attributes) => ({ 'data-character-name': attributes.name }), parseHTML: (element) => element.getAttribute('data-character-name') },
     }
   },
 
@@ -168,6 +169,12 @@ export const Character = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     return ['p', mergeAttributes({ class: 'screenplay-element' }, HTMLAttributes, { 'data-type': 'character' }), 0]
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Alt-3': () => this.editor.commands.setNode(this.name),
+    }
   },
 })
 
@@ -184,10 +191,10 @@ export const Dialogue = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      characterId: { default: null, rendered: false },
-      isDual: { default: false, rendered: false },
-      dualPairId: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      characterId: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-character-id': attributes.characterId }), parseHTML: (element) => element.getAttribute('data-character-id') },
+      isDual: { default: false, rendered: true, renderHTML: (attributes) => ({ 'data-is-dual': attributes.isDual }), parseHTML: (element) => element.getAttribute('data-is-dual') },
+      dualPairId: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-dual-pair-id': attributes.dualPairId }), parseHTML: (element) => element.getAttribute('data-dual-pair-id') },
     }
   },
 
@@ -197,6 +204,12 @@ export const Dialogue = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     return ['p', mergeAttributes({ class: 'screenplay-element' }, HTMLAttributes, { 'data-type': 'dialogue' }), 0]
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Alt-4': () => this.editor.commands.setNode(this.name),
+    }
   },
 })
 
@@ -213,8 +226,8 @@ export const Parenthetical = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      characterId: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      characterId: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-character-id': attributes.characterId }), parseHTML: (element) => element.getAttribute('data-character-id') },
     }
   },
 
@@ -224,6 +237,12 @@ export const Parenthetical = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     return ['p', mergeAttributes({ class: 'screenplay-element' }, HTMLAttributes, { 'data-type': 'parenthetical' }), 0]
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Alt-6': () => this.editor.commands.setNode(this.name),
+    }
   },
 })
 
@@ -240,8 +259,8 @@ export const Transition = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      transitionType: { default: 'CUSTOM', rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      transitionType: { default: 'CUSTOM', rendered: true, renderHTML: (attributes) => ({ 'data-transition-type': attributes.transitionType }), parseHTML: (element) => element.getAttribute('data-transition-type') },
     }
   },
 
@@ -251,6 +270,12 @@ export const Transition = Node.create({
 
   renderHTML({ HTMLAttributes }) {
     return ['p', mergeAttributes({ class: 'screenplay-element' }, HTMLAttributes, { 'data-type': 'transition' }), 0]
+  },
+
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Alt-5': () => this.editor.commands.setNode(this.name),
+    }
   },
 })
 
@@ -267,8 +292,8 @@ export const Shot = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      shotType: { default: 'CUSTOM', rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      shotType: { default: 'CUSTOM', rendered: true, renderHTML: (attributes) => ({ 'data-shot-type': attributes.shotType }), parseHTML: (element) => element.getAttribute('data-shot-type') },
     }
   },
 
@@ -294,8 +319,8 @@ export const Section = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      level: { default: 1, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      level: { default: 1, rendered: true, renderHTML: (attributes) => ({ 'data-level': attributes.level }), parseHTML: (element) => element.getAttribute('data-level') },
     }
   },
 
@@ -322,8 +347,8 @@ export const PageBreak = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      forced: { default: true, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      forced: { default: true, rendered: true, renderHTML: (attributes) => ({ 'data-forced': attributes.forced }), parseHTML: (element) => element.getAttribute('data-forced') },
     }
   },
 
@@ -350,9 +375,9 @@ export const DualDialogueStart = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
-      leftCharacterId: { default: null, rendered: false },
-      rightCharacterId: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
+      leftCharacterId: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-left-character-id': attributes.leftCharacterId }), parseHTML: (element) => element.getAttribute('data-left-character-id') },
+      rightCharacterId: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-right-character-id': attributes.rightCharacterId }), parseHTML: (element) => element.getAttribute('data-right-character-id') },
     }
   },
 
@@ -375,7 +400,7 @@ export const DualDialogueEnd = Node.create({
 
   addAttributes() {
     return {
-      id: { default: null, rendered: false },
+      id: { default: null, rendered: true, renderHTML: (attributes) => ({ 'data-id': attributes.id }), parseHTML: (element) => element.getAttribute('data-id') },
     }
   },
 

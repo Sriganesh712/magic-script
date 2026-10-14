@@ -181,6 +181,8 @@ function getTableName(entityType: SyncOperation['entityType']): string | null {
       return 'screenplays'
     case 'revision':
       return 'revisions'
+    case 'note':
+      return 'notes'
     default:
       return null
   }
@@ -260,6 +262,14 @@ function mapToRemoteRow(
         char_count: data.charCount,
         created_by: data.createdBy,
         created_at: new Date(data.createdAt || Date.now()).toISOString(),
+      }
+    case 'note':
+      return {
+        ...base,
+        project_id: data.projectId,
+        scene_id: data.sceneId || null,
+        content: data.content,
+        type: data.type,
       }
     default:
       return base

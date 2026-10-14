@@ -19,7 +19,7 @@ import { SearchReplaceBar } from '@/components/SearchReplaceBar'
 import { CharacterAutocompletePopup } from '@/components/CharacterAutocompletePopup'
 import { generateId } from '@/lib/db'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { EditorView } from 'prosemirror-view'
+import type { EditorView } from '@tiptap/pm/view'
 
 // ============================================================================
 // Type Extensions
@@ -138,15 +138,14 @@ export function ScreenplayEditor({
           event.preventDefault()
           return commands.setNode('action', { id: generateId() })
         }
-        // Empty character -> dialogue
+        // Empty character/dialogue ends the cue and returns to action.
         if (currentType === 'character') {
           event.preventDefault()
-          return commands.setNode('dialogue', { id: generateId(), characterId: currentNode.attrs.characterId })
+          return commands.setNode('action', { id: generateId() })
         }
-        // Empty dialogue -> character (next speaker)
         if (currentType === 'dialogue') {
           event.preventDefault()
-          return commands.setNode('character', { id: generateId() })
+          return commands.setNode('action', { id: generateId() })
         }
         // Empty parenthetical -> dialogue
         if (currentType === 'parenthetical') {
@@ -377,5 +376,8 @@ export function insertTransition(editor: ReturnType<typeof useEditor> | undefine
 
 export function insertPageBreak(editor: ReturnType<typeof useEditor> | undefined) {
   if (!editor) return false
-  return editor.chain().focus().setNode('pageBreak', { id: generateId(), forced: true }).run()
+  return editor.chain().focus().insertContent({
+    type: 'pageBreak',
+    attrs: { id: generateId(), forced: true },
+  }).run()
 }

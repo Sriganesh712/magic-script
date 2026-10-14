@@ -89,8 +89,9 @@ export function SceneOutlinePanel({
         if (node.type.name === 'sceneHeading') {
           const sceneId = node.attrs.id || `scene_${order}`
           const interior = node.attrs.interior || 'INT'
-          const location = node.attrs.location || 'UNKNOWN LOCATION'
-          const timeOfDay = node.attrs.timeOfDay || 'DAY'
+          const headingText = node.textContent.trim()
+          const location = node.attrs.location || headingText.replace(/^(INT\/EXT|INT|EXT)\.?\s*/i, '').split(/\s+-\s+/)[0] || 'UNKNOWN LOCATION'
+          const timeOfDay = node.attrs.timeOfDay || headingText.split(/\s+-\s+/).slice(1).join(' - ') || 'DAY'
           
           const existing = savedCardsRef.current.get(sceneId)
 
@@ -158,7 +159,33 @@ export function SceneOutlinePanel({
       return newScenes.map((s, i) => ({ ...s, order: i }))
     })
     
+    const dragged = scenes.find((scene) => scene.id === draggedScene)
+    const target = scenes.find((scene) => scene.id === targetSceneId)
+    if (dragged && target && editor) {
+      reorderSceneBlocks(dragged.elementId, target.elementId)
+    }
     setDraggedScene(null)
+  }
+
+  const reorderSceneBlocks = (draggedElementId: string, targetElementId: string) => {
+    if (!editor || draggedElementId === targetElementId) return
+    const blocks: Array<{ id: string; from: number; to: number }> = []
+    editor.state.doc.descendants((node: any, pos: number, parent: any) => {
+      if (parent === editor.state.doc && node.type.name === 'sceneHeading') {
+        blocks.push({ id: node.attrs.id, from: pos, to: editor.state.doc.content.size })
+      }
+    })
+    blocks.forEach((block, index) => {
+      block.to = blocks[index + 1]?.from ?? editor.state.doc.content.size
+    })
+    const source = blocks.find((block) => block.id === draggedElementId)
+    const target = blocks.find((block) => block.id === targetElementId)
+    if (!source || !target) return
+    const slice = editor.state.doc.slice(source.from, source.to)
+    let tr = editor.state.tr.delete(source.from, source.to)
+    const targetFrom = source.from < target.from ? target.from - (source.to - source.from) : target.from
+    tr = tr.insert(targetFrom, slice.content)
+    editor.view.dispatch(tr)
   }
 
   const handleDragEnd = () => {
@@ -212,18 +239,21 @@ export function SceneOutlinePanel({
       editor.view.focus()
     }
     
-    onSceneClick?.(sceneId)
+    const scene = scenes.find((item) => item.id === sceneId)
+    onSceneClick?.(scene?.elementId || sceneId)
   }
 
   const deleteScene = (e: React.MouseEvent, sceneId: string) => {
     e.stopPropagation()
     if (confirm('Delete this scene? This cannot be undone.')) {
-      onSceneDelete?.(sceneId)
+      const scene = scenes.find((item) => item.id === sceneId)
+      onSceneDelete?.(scene?.elementId || sceneId)
     }
   }
 
   const addSceneAfter = (sceneId?: string) => {
-    onSceneAdd?.(sceneId)
+    const scene = scenes.find((item) => item.id === sceneId)
+    onSceneAdd?.(scene?.elementId || sceneId)
   }
 
   return (

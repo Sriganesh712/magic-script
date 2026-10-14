@@ -1,7 +1,7 @@
 import { ThemeProvider } from 'next-themes'
 import { AppRouter } from './router'
 import './editor/ScreenplayEditor.css'
-import './App.css'
+import { Toaster } from './components/ui/sonner'
 
 /**
  * Root Application Component
@@ -16,6 +16,7 @@ export function App() {
       disableTransitionOnChange
     >
       <AppRouter />
+      <Toaster />
     </ThemeProvider>
   )
 }

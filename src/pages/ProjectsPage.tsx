@@ -45,6 +45,7 @@ import {
   Filter,
 } from 'lucide-react'
 import { cn } from 'cn'
+import { importFountain, importFDX } from '@/lib/export'
 
 const STATUS_CONFIG: Record<
   ProjectStatus,
@@ -105,6 +106,64 @@ export function ProjectsPage() {
   // Delete Confirmation Dialog State
   const [projectToDelete, setProjectToDelete] = useState<ProjectWithStats | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleImportScreenplay = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    try {
+      const text = await file.text()
+      const result = file.name.toLowerCase().endsWith('.fdx') ? importFDX(text) : importFountain(text)
+      if (!result.success || !result.document) {
+        throw new Error(result.errors?.[0]?.message || 'Import failed')
+      }
+      const now = Date.now() as Timestamp
+      const projectId = generateId()
+      const draftId = generateId()
+      const screenplayId = generateId()
+      const title = result.document.metadata.title || file.name.replace(/\.(fountain|fdx)$/i, '')
+      const project: Project = {
+        id: projectId,
+        name: title,
+        status: 'drafting',
+        createdAt: now,
+        updatedAt: now,
+        settings: {
+          pageFormat: DEFAULT_PAGE_FORMAT,
+          autoSaveInterval: 2000,
+          revisionTracking: true,
+        },
+      }
+      const draft: Draft = {
+        id: draftId,
+        projectId,
+        name: 'Imported Draft',
+        isCurrent: true,
+        screenplayId,
+        createdAt: now,
+        updatedAt: now,
+      }
+      const screenplay: ScreenplayDocument = {
+        ...result.document,
+        id: screenplayId,
+        projectId,
+        draftId,
+        createdAt: now,
+        updatedAt: now,
+      }
+      await db.transaction('rw', [db.projects, db.drafts, db.screenplays], async () => {
+        await db.projects.add(project)
+        await db.drafts.add(draft)
+        await db.screenplays.add(screenplay)
+      })
+      await loadProjects()
+      navigate(`/project/${projectId}`)
+    } catch (error) {
+      console.error('[ProjectsPage] Import failed:', error)
+      alert(`Import failed: ${(error as Error).message}`)
+    } finally {
+      event.target.value = ''
+    }
+  }
 
   // Load projects from Dexie DB
   const loadProjects = useCallback(async () => {
@@ -457,6 +516,15 @@ export function ProjectsPage() {
             <Sparkles className="w-4 h-4 text-sr-orange-500" />
             <span>Load Demo Screenplay</span>
           </Button>
+          <label>
+            <Button asChild variant="outline" className="px-5 py-2.5 h-10 gap-2 cursor-pointer font-medium text-sm">
+              <span>
+                <FileText className="w-4 h-4" />
+                Import Fountain / FDX
+              </span>
+            </Button>
+            <input type="file" accept=".fountain,.fdx" className="hidden" onChange={handleImportScreenplay} />
+          </label>
         </div>
       </div>
 

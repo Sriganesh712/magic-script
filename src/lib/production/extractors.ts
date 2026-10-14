@@ -73,8 +73,12 @@ export function extractCharactersFromElements(
         data.lastAppearance = currentSceneId
       }
 
-      // Check if subsequent element is dialogue
-      if (i + 1 < elements.length && isDialogue(elements[i + 1])) {
+      // Parentheticals may appear between a character cue and its dialogue.
+      let nextIndex = i + 1
+      while (nextIndex < elements.length && elements[nextIndex].type === 'parenthetical') {
+        nextIndex++
+      }
+      if (nextIndex < elements.length && isDialogue(elements[nextIndex])) {
         data.dialogueCount++
       }
     }

@@ -12,7 +12,6 @@ import {
 } from '@/lib'
 import {
   getDriveAuthState,
-  listDriveFiles,
   getCachedDriveFiles,
   type DriveFileMetadata,
 } from '@/lib/drive'
@@ -193,21 +192,11 @@ export function DashboardPage() {
       setDailyStats(realStats)
       setGoals(realGoals)
 
-      // Refresh Google Drive auth and real-time cloud files
+      // Refresh Google Drive auth; file listings are explicitly user-triggered,
+      // not part of the dashboard polling path.
       const currentDriveAuth = getDriveAuthState()
       setDriveAuth(currentDriveAuth)
-
-      if (currentDriveAuth.isConnected && currentDriveAuth.accessToken) {
-        try {
-          const remoteFiles = await listDriveFiles()
-          setCloudFiles(remoteFiles)
-        } catch (err) {
-          console.warn('[DashboardPage] Drive files list error:', err)
-          setCloudFiles(getCachedDriveFiles())
-        }
-      } else {
-        setCloudFiles(getCachedDriveFiles())
-      }
+      setCloudFiles(getCachedDriveFiles())
 
       // Refresh Supabase user status
       const sbUser = await getCurrentUser()
@@ -273,17 +262,11 @@ export function DashboardPage() {
       }
     }
 
-    // 3. Periodic polling interval (every 4 seconds) to ensure real-time cloud sync
-    const pollInterval = setInterval(() => {
-      loadAnalyticsData(true)
-    }, 4000)
-
     return () => {
       window.removeEventListener('screenplay:data-changed', handleDataChanged)
       window.removeEventListener('screenplay:cloud-backup', handleCloudBackup)
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('focus', handleWindowFocus)
-      clearInterval(pollInterval)
       if (channel && supabase) {
         supabase.removeChannel(channel)
       }
@@ -360,11 +343,14 @@ export function DashboardPage() {
       map[stat.date] = (map[stat.date] || 0) + (stat.netWords > 0 ? stat.netWords : stat.wordsAdded)
     })
 
-    // From sessions
+    // Sessions are a fallback for dates without a materialized daily stat.
+    // Adding both sources double-counts writing activity.
     filteredSessions.forEach((s) => {
       const d = new Date(s.startTime)
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
-      map[key] = (map[key] || 0) + (s.netWords > 0 ? s.netWords : s.wordsAdded)
+      if (map[key] === undefined) {
+        map[key] = s.netWords > 0 ? s.netWords : s.wordsAdded
+      }
     })
 
     return map

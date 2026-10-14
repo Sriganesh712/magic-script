@@ -167,7 +167,7 @@ export function AuthCallbackPage() {
                 <p className="font-semibold text-foreground text-[11px]">Troubleshooting tips:</p>
                 <ul className="list-disc pl-4 space-y-1 text-[11px]">
                   <li>Verify that <strong>Google provider</strong> is enabled in your Supabase dashboard (Authentication &gt; Providers &gt; Google).</li>
-                  <li>Check that your Supabase <strong>Redirect URLs</strong> include <code className="font-mono text-[10px]">http://localhost:5173/auth/callback</code>.</li>
+                  <li>Check that your Supabase <strong>Redirect URLs</strong> include <code className="font-mono text-[10px]">{typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'}</code>.</li>
                   <li>Ensure your Google Cloud Console Web Client includes your Supabase URL in Authorized Redirect URIs.</li>
                 </ul>
               </div>

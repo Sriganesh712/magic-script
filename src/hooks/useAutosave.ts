@@ -7,6 +7,8 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { Editor } from '@tiptap/react'
 import { initDB, getScreenplay, type EntityId, type Timestamp } from '@/lib'
+import { htmlToElements } from '@/lib/export'
+import { enqueueSyncOp } from '@/lib/sync'
 
 interface AutosaveOptions {
   screenplayId: EntityId
@@ -126,12 +128,18 @@ export function useAutosave(editor: Editor | null, options: AutosaveOptions) {
       }
       
       // Update with current content
-      screenplay.elements = content as any // In reality, would parse HTML to elements
+      screenplay.elements = htmlToElements(content)
       screenplay.updatedAt = now
       
       // Save to IndexedDB
       const { db } = await import('@/lib')
       await db.screenplays.put(screenplay)
+      await enqueueSyncOp(projectId, 'screenplay', screenplay.id, 'update', {
+        id: screenplay.id,
+        projectId,
+        draftId,
+        elements: screenplay.elements,
+      })
       
       lastContentRef.current = content
       saveCountRef.current++

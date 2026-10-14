@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client"
 
 
@@ -6,7 +5,7 @@ import * as React from "react"
 
 import { cn } from "cn"
 
-import { Tooltip as TooltipPrimitive } from "@radix-ui/react-tooltip"
+import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 
 function TooltipProvider({
   delayDuration = 0,

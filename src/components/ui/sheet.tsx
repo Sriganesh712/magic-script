@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client"
 
 
@@ -6,10 +5,10 @@ import * as React from "react"
 
 import { cn } from "cn"
 
-import { Dialog as SheetPrimitive } from "@radix-ui/react-dialog"
+import * as SheetPrimitive from "@radix-ui/react-dialog"
 
 
-import { Button } from "@/components/ui/button"
+import { Button } from "./button"
 
 import { XIcon } from "lucide-react"
 

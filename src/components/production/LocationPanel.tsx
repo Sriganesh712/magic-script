@@ -65,7 +65,11 @@ export function LocationPanel({
 
   useEffect(() => {
     loadLocations()
-  }, [projectId])
+  }, [projectId, elements])
+
+  useEffect(() => {
+    void handleSyncWithScript()
+  }, [projectId, elements])
 
   const handleSyncWithScript = async () => {
     try {

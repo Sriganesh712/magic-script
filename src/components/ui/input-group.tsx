@@ -1,4 +1,3 @@
-// @ts-nocheck
 "use client"
 
 
@@ -9,11 +8,11 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "cn"
 
 
-import { Button } from "@/components/ui/button"
+import { Button } from "./button"
 
-import { Input } from "@/components/ui/input"
+import { Input } from "./input"
 
-import { Textarea } from "@/components/ui/textarea"
+import { Textarea } from "./textarea"
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (

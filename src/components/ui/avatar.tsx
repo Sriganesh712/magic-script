@@ -1,10 +1,9 @@
-// @ts-nocheck
 
 import * as React from "react"
 
 import { cn } from "cn"
 
-import { Avatar as AvatarPrimitive } from "@radix-ui/react-avatar"
+import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
 function Avatar({
   className,

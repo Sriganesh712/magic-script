@@ -61,6 +61,17 @@ export function Layout({ children }: LayoutProps) {
     }
   }, [])
 
+  useEffect(() => {
+    const handleShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        setIsCollapsed((collapsed) => !collapsed)
+      }
+    }
+    window.addEventListener('keydown', handleShortcut)
+    return () => window.removeEventListener('keydown', handleShortcut)
+  }, [])
+
   const toggleTheme = () => {
     if (!mounted) return
     if (theme === 'dark') {

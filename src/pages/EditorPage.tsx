@@ -36,11 +36,15 @@ import {
   exportToFountain,
   exportToFDX,
   htmlToElements,
+  elementsToHtml,
+  importFountain,
+  importFDX,
 } from '@/lib/export'
 import {
   getDriveAuthState,
   uploadToGoogleDrive,
 } from '@/lib/drive'
+import { getSceneFeedback, isGroqConfigured } from '@/lib/ai/client'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { Alert, AlertDescription } from '@/components/ui/alert'
@@ -84,12 +88,14 @@ export function EditorPage() {
   const { projectId } = useParams<{ projectId: string }>()
   const [project, setProject] = useState<Project | null>(null)
   const [draft, setDraft] = useState<Draft | null>(null)
+  const [drafts, setDrafts] = useState<Draft[]>([])
   const [screenplay, setScreenplay] = useState<ScreenplayDocument | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [content, setContent] = useState<string>(DEFAULT_STARTER_CONTENT)
   const [wordCount, setWordCount] = useState(0)
   const [showSidebar, setShowSidebar] = useState(true)
   const [sidebarTab, setSidebarTab] = useState<SidebarTab>('outline')
+  const [activeSceneId, setActiveSceneId] = useState<EntityId | undefined>()
   const [showRecovery, setShowRecovery] = useState(false)
   const [exportNotice, setExportNotice] = useState<string | null>(null)
   const [cloudNotice, setCloudNotice] = useState<{
@@ -98,6 +104,9 @@ export function EditorPage() {
     link?: string
   } | null>(null)
   const [exportingFormat, setExportingFormat] = useState<'PDF' | 'Fountain' | 'FDX' | null>(null)
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [aiFeedback, setAiFeedback] = useState('')
+  const [isAiLoading, setIsAiLoading] = useState(false)
 
   const editorRef = useRef<any>(null)
   const [editorInstance, setEditorInstance] = useState<any>(null)
@@ -152,6 +161,9 @@ export function EditorPage() {
         }
 
         if (isMounted) setDraft(currentDraft)
+        if (isMounted) {
+          setDrafts(await db.drafts.where('projectId').equals(pid).toArray())
+        }
 
         // Find or create screenplay document
         let currentScreenplay = await db.screenplays
@@ -181,7 +193,10 @@ export function EditorPage() {
 
           const storageKey = `screenplay_content_${currentScreenplay.id}`
           const cached = localStorage.getItem(storageKey)
-          const initialText = cached || DEFAULT_STARTER_CONTENT
+          const storedElements = currentScreenplay.elements?.length
+            ? elementsToHtml(currentScreenplay.elements)
+            : ''
+          const initialText = storedElements || cached || DEFAULT_STARTER_CONTENT
           setContent(initialText)
           lastSavedContentRef.current = initialText
 
@@ -189,6 +204,31 @@ export function EditorPage() {
           const words = text.trim().split(/\s+/).filter((w) => w.length > 0).length
           setWordCount(words)
           lastSavedWordCountRef.current = words
+
+          const globalSettings = localStorage.getItem('screenplay_studio_global_settings')
+          if (globalSettings) {
+            try {
+              const parsed = JSON.parse(globalSettings)
+              if (parsed.pageFormat || parsed.autoSaveInterval) {
+                setProject((previous) =>
+                  previous
+                    ? {
+                        ...previous,
+                        settings: {
+                          ...previous.settings,
+                          ...(parsed.pageFormat ? { pageFormat: parsed.pageFormat } : {}),
+                          ...(parsed.autoSaveInterval
+                            ? { autoSaveInterval: parsed.autoSaveInterval }
+                            : {}),
+                        },
+                      }
+                    : previous
+                )
+              }
+            } catch (error) {
+              console.warn('[EditorPage] Ignoring invalid global settings:', error)
+            }
+          }
         }
       } catch (err) {
         console.error('[EditorPage] Error loading screenplay data:', err)
@@ -313,6 +353,126 @@ export function EditorPage() {
     editorRef.current = editor
     setEditorInstance(editor)
   }, [])
+
+  useEffect(() => {
+    const handleSaveShortcut = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault()
+        void manualSave()
+      }
+    }
+    window.addEventListener('keydown', handleSaveShortcut)
+    return () => window.removeEventListener('keydown', handleSaveShortcut)
+  }, [manualSave])
+
+  const switchDraft = async (draftId: EntityId) => {
+    if (!project || draftId === draft?.id) return
+    const selected = await db.drafts.get(draftId)
+    if (!selected) return
+    await db.drafts.where('projectId').equals(project.id).modify({ isCurrent: false })
+    await db.drafts.update(selected.id, { isCurrent: true, updatedAt: Date.now() as Timestamp })
+    const selectedScreenplay = await db.screenplays.where('draftId').equals(selected.id).first()
+    if (!selectedScreenplay) return
+    const nextContent = selectedScreenplay.elements.length
+      ? elementsToHtml(selectedScreenplay.elements)
+      : DEFAULT_STARTER_CONTENT
+    setDraft({ ...selected, isCurrent: true })
+    setDrafts((items) => items.map((item) => ({ ...item, isCurrent: item.id === selected.id })))
+    setScreenplay(selectedScreenplay)
+    setContent(nextContent)
+    editorRef.current?.commands.setContent(nextContent)
+  }
+
+  const createDraft = async () => {
+    if (!project || !draft || !screenplay) return
+    const now = Date.now() as Timestamp
+    const nextNumber =
+      (await db.drafts.where('projectId').equals(project.id).count()) + 1
+    const nextDraft: Draft = {
+      id: generateId(),
+      projectId: project.id,
+      name: `Draft ${nextNumber}`,
+      isCurrent: true,
+      screenplayId: generateId(),
+      createdAt: now,
+      updatedAt: now,
+    }
+    const nextScreenplay: ScreenplayDocument = {
+      ...screenplay,
+      id: nextDraft.screenplayId,
+      draftId: nextDraft.id,
+      elements: htmlToElements(content),
+      createdAt: now,
+      updatedAt: now,
+    }
+    await db.transaction('rw', [db.drafts, db.screenplays], async () => {
+      await db.drafts.where('projectId').equals(project.id).modify({ isCurrent: false })
+      await db.drafts.add(nextDraft)
+      await db.screenplays.add(nextScreenplay)
+    })
+    setDraft(nextDraft)
+    setDrafts((items) => [...items.map((item) => ({ ...item, isCurrent: false })), nextDraft])
+    setScreenplay(nextScreenplay)
+  }
+
+  const handleSceneDelete = (sceneId: string) => {
+    const editor = editorRef.current
+    if (!editor) return
+    const positions: Array<{ id: string; pos: number }> = []
+    editor.state.doc.descendants((node: any, pos: number, parent: any) => {
+      if (parent === editor.state.doc && node.type.name === 'sceneHeading') {
+        positions.push({ id: node.attrs.id, pos })
+      }
+    })
+    const index = positions.findIndex((item) => item.id === sceneId)
+    if (index < 0) return
+    const from = positions[index].pos
+    const to = positions[index + 1]?.pos ?? editor.state.doc.content.size
+    editor.chain().focus().deleteRange({ from, to }).run()
+  }
+
+  const handleSceneAdd = (afterSceneId?: string) => {
+    const editor = editorRef.current
+    if (!editor || !afterSceneId) {
+      insertSceneHeading(editor, { interior: 'INT', location: 'NEW LOCATION', timeOfDay: 'DAY' })
+      return
+    }
+    const positions: Array<{ id: string; pos: number; nodeSize: number }> = []
+    editor.state.doc.descendants((node: any, pos: number, parent: any) => {
+      if (parent === editor.state.doc && node.type.name === 'sceneHeading') {
+        positions.push({ id: node.attrs.id, pos, nodeSize: node.nodeSize })
+      }
+    })
+    const sceneIndex = positions.findIndex((item) => item.id === afterSceneId)
+    const insertAt =
+      sceneIndex >= 0
+        ? positions[sceneIndex].pos + positions[sceneIndex].nodeSize
+        : editor.state.doc.content.size
+    editor
+      .chain()
+      .focus()
+      .insertContentAt(insertAt, {
+        type: 'sceneHeading',
+        attrs: { id: generateId(), interior: 'INT', location: 'NEW LOCATION', timeOfDay: 'DAY' },
+      })
+      .run()
+  }
+
+  const runScriptDoctor = async () => {
+    if (!isGroqConfigured()) {
+      setAiFeedback('Configure a Groq API key in Settings > AI Assistance first.')
+      return
+    }
+    setIsAiLoading(true)
+    try {
+      const result = await getSceneFeedback(aiPrompt || content.replace(/<[^>]+>/g, ' '))
+      setAiFeedback(result.text)
+    } catch (error) {
+      setAiFeedback((error as Error).message)
+    } finally {
+      setIsAiLoading(false)
+    }
+  }
 
   // Restore snapshot handler
   const handleRestoreContent = useCallback(
@@ -497,8 +657,27 @@ export function EditorPage() {
           alert('Import failed: ' + err.message)
         })
     }
+
     reader.readAsText(file)
     e.target.value = ''
+  }
+
+  const handleImportScreenplay = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    try {
+      const text = await file.text()
+      const result = file.name.toLowerCase().endsWith('.fdx') ? importFDX(text) : importFountain(text)
+      if (!result.success || !result.document) throw new Error(result.errors?.[0]?.message || 'Import failed')
+      const html = elementsToHtml(result.document.elements)
+      setContent(html)
+      editorRef.current?.commands.setContent(html)
+      await manualSave()
+    } catch (err) {
+      alert(`Import failed: ${(err as Error).message}`)
+    } finally {
+      e.target.value = ''
+    }
   }
 
   if (isLoading) {
@@ -643,9 +822,23 @@ export function EditorPage() {
               </Select>
 
               {draft && (
-                <span className="text-[11px] text-muted-foreground px-2 py-0.5 rounded-full bg-muted font-medium hidden md:inline">
-                  {draft.name}
-                </span>
+                <div className="flex items-center gap-1">
+                  <Select value={draft.id} onValueChange={(value) => void switchDraft(value as EntityId)}>
+                    <SelectTrigger className="h-6 w-28 text-[11px] px-2.5 bg-muted border-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {drafts.map((item) => (
+                          <SelectItem key={item.id} value={item.id}>
+                            {item.name}
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                  <Button variant="ghost" size="xs" onClick={() => void createDraft()} title="Create draft">
+                    +
+                  </Button>
+                </div>
               )}
             </div>
 
@@ -684,6 +877,17 @@ export function EditorPage() {
 
             {/* Export buttons */}
             <div className="flex items-center gap-1 font-matter">
+              <label className="inline-flex items-center">
+                <Button asChild variant="outline" size="xs" className="text-[11px] h-7 px-3 cursor-pointer">
+                  <span>Import</span>
+                </Button>
+                <input
+                  type="file"
+                  accept=".fountain,.fdx"
+                  className="hidden"
+                  onChange={handleImportScreenplay}
+                />
+              </label>
               <Button
                 variant="outline"
                 size="xs"
@@ -890,14 +1094,9 @@ export function EditorPage() {
                   editor={editorInstance}
                   screenplayId={screenplay?.id}
                   projectId={project.id}
-                  onSceneClick={() => {}}
-                  onSceneAdd={() =>
-                    insertSceneHeading(editorRef.current, {
-                      interior: 'INT',
-                      location: 'NEW LOCATION',
-                      timeOfDay: 'DAY',
-                    })
-                  }
+                  onSceneClick={(sceneId) => setActiveSceneId(sceneId as EntityId)}
+                  onSceneDelete={handleSceneDelete}
+                  onSceneAdd={handleSceneAdd}
                 />
               )}
               {sidebarTab === 'characters' && (
@@ -913,7 +1112,7 @@ export function EditorPage() {
                 />
               )}
               {sidebarTab === 'notes' && (
-                <NotesPanel projectId={project.id} />
+                <NotesPanel projectId={project.id} activeSceneId={activeSceneId} />
               )}
               {sidebarTab === 'revisions' && (
                 <RevisionPanel
@@ -939,6 +1138,27 @@ export function EditorPage() {
           />
         </main>
       </div>
+
+      <section className="border-t border-border bg-card/70 p-3">
+        <div className="mx-auto max-w-5xl">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold">AI Script Doctor</h2>
+          </div>
+          <div className="flex gap-2">
+            <textarea
+              value={aiPrompt}
+              onChange={(event) => setAiPrompt(event.target.value)}
+              placeholder="Optional focus for feedback (otherwise the current script is reviewed)"
+              className="min-h-16 flex-1 rounded-md border border-border bg-background px-3 py-2 text-xs"
+            />
+            <Button size="sm" onClick={() => void runScriptDoctor()} disabled={isAiLoading}>
+              {isAiLoading ? 'Reviewing...' : 'Review'}
+            </Button>
+          </div>
+          {aiFeedback && <p className="mt-2 whitespace-pre-wrap text-xs text-muted-foreground">{aiFeedback}</p>}
+        </div>
+      </section>
 
       {/* Screenplay Keyboard Guide Footer */}
       <footer className="bg-card/70 border-t border-border px-4 py-2 text-xs text-muted-foreground hidden md:block">

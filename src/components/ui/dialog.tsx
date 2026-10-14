@@ -1,8 +1,7 @@
-// @ts-nocheck
 import * as React from "react"
 import { cn } from "cn"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
-import { Button } from "@/components/ui/button"
+import { Button } from "./button"
 import { XIcon } from "lucide-react"
 
 

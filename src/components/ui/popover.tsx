@@ -1,10 +1,9 @@
-// @ts-nocheck
 
 import * as React from "react"
 
 import { cn } from "cn"
 
-import { Popover as PopoverPrimitive } from "@radix-ui/react-popover"
+import * as PopoverPrimitive from "@radix-ui/react-popover"
 
 function Popover({
   ...props

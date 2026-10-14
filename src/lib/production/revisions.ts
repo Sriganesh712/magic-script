@@ -13,6 +13,7 @@ import type {
 import { db, generateId } from '@/lib/db'
 import { countWords, diffWords } from '@/lib/analytics/word-diff'
 import { elementsToHtml } from '@/lib/export/html-converter'
+import { enqueueSyncOp } from '@/lib/sync'
 
 // ============================================================================
 // Types
@@ -82,6 +83,7 @@ export async function createRevisionSnapshot(params: {
   }
 
   await db.revisions.add(snapshot)
+  await enqueueSyncOp(snapshot.projectId, 'revision', snapshot.id, 'create', snapshot)
   return snapshot
 }
 
@@ -106,7 +108,11 @@ export async function getRevisionSnapshots(
  * Deletes a snapshot by ID.
  */
 export async function deleteRevisionSnapshot(snapshotId: EntityId): Promise<void> {
+  const snapshot = await db.revisions.get(snapshotId)
   await db.revisions.delete(snapshotId)
+  if (snapshot) {
+    await enqueueSyncOp(snapshot.projectId, 'revision', snapshotId, 'delete')
+  }
 }
 
 /**

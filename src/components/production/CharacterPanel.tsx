@@ -59,7 +59,11 @@ export function CharacterPanel({
 
   useEffect(() => {
     loadCharacters()
-  }, [projectId])
+  }, [projectId, elements])
+
+  useEffect(() => {
+    void handleSyncWithScript()
+  }, [projectId, elements])
 
   // Sync / Auto-extract from editor elements
   const handleSyncWithScript = async () => {

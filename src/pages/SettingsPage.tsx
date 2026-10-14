@@ -737,7 +737,7 @@ export function SettingsPage() {
                   <p>
                     OAuth redirect route:{' '}
                     <code className="font-mono text-[10px] bg-muted px-1 py-0.5 rounded">
-                      {typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : 'http://localhost:5173/auth/callback'}
+                      {typeof window !== 'undefined' ? `${window.location.origin}/auth/callback` : '/auth/callback'}
                     </code>
                   </p>
                 </div>
@@ -818,10 +818,10 @@ export function SettingsPage() {
                       <p className="font-medium text-foreground">Setup Checklist in Google Cloud Console:</p>
                       <ul className="list-disc pl-4 space-y-1 text-[10px]">
                         <li>
-                          <strong>Fix Error 403 (access_denied)</strong>: Go to <strong>APIs & Services &gt; OAuth consent screen</strong> &gt; scroll to <strong>Test users</strong> &gt; click <strong>+ ADD USERS</strong> &gt; enter your email (<code className="font-mono bg-muted px-1">sriganeshravi9095@gmail.com</code>) &gt; click <strong>SAVE</strong>.
+                          <strong>Fix Error 403 (access_denied)</strong>: Go to <strong>APIs & Services &gt; OAuth consent screen</strong> &gt; scroll to <strong>Test users</strong> &gt; click <strong>+ ADD USERS</strong> &gt; enter your email (<code className="font-mono bg-muted px-1">your-email@example.com</code>) &gt; click <strong>SAVE</strong>.
                         </li>
                         <li>In <strong>APIs & Services &gt; Credentials &gt; OAuth 2.0 Web Client</strong>:</li>
-                        <li>Add <strong>Authorized JavaScript origins</strong>: <code className="font-mono bg-muted px-1">http://localhost:5173</code> and <code className="font-mono bg-muted px-1">http://localhost</code></li>
+                        <li>Add <strong>Authorized JavaScript origins</strong>: <code className="font-mono bg-muted px-1">your-app-origin</code></li>
                         <li>In <strong>APIs & Services &gt; Library</strong>: Ensure <strong>Google Drive API</strong> is enabled.</li>
                       </ul>
                     </div>
